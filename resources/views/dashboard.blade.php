@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TontineTD — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0e1a; --surface: #111827; --surface2: #1a2235; --border: #1f2d45;
+            --accent: #f0a500; --accent2: #00c2a8; --text: #e8edf5; --muted: #6b7a99;
+            --danger: #e05252; --success: #3ecf8e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+        .sidebar { width: 240px; min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 2rem 1.2rem; position: fixed; top: 0; left: 0; bottom: 0; }
+        .logo { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; margin-bottom: 0.3rem; }
+        .logo span { color: var(--accent2); }
+        .logo-sub { font-size: 0.72rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2.5rem; }
+        .nav-label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; margin-top: 1.5rem; }
+        .nav-item { display: flex; align-items: center; padding: 0.7rem 1rem; border-radius: 8px; color: var(--muted); font-size: 0.9rem; font-weight: 500; transition: all 0.2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+        .nav-item:hover, .nav-item.active { background: var(--surface2); color: var(--text); }
+        .nav-item.active { color: var(--accent); }
+        .sidebar-footer { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--muted); text-align: center; }
+
+        .main { margin-left: 240px; flex: 1; padding: 2rem 2.5rem; min-height: 100vh; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+        .page-title { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 700; }
+        .page-title span { color: var(--accent); }
+        .badge-date { background: var(--surface2); border: 1px solid var(--border); padding: 0.45rem 1rem; border-radius: 999px; font-size: 0.8rem; color: var(--muted); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.5rem; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+        .stat-value { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 700; }
+        .stat-card.accent .stat-value { color: var(--accent); }
+        .stat-card.teal .stat-value { color: var(--accent2); }
+        .stat-card.green .stat-value { color: var(--success); }
+
+        .section { display: none; }
+        .section.active { display: block; }
+
+        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; }
+        .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); }
+        .panel-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+        .panel-body { padding: 1.5rem; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .form-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+        .form-control { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; width: 100%; }
+        .form-control:focus { border-color: var(--accent); }
+        .form-control option { background: var(--surface2); }
+
+        .btn { padding: 0.65rem 1.5rem; border-radius: 8px; border: none; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+        .btn-primary { background: var(--accent); color: #0a0e1a; }
+        .btn-primary:hover { background: #ffc034; transform: translateY(-1px); }
+        .btn-danger { background: rgba(224,82,82,0.15); color: var(--danger); border: 1px solid rgba(224,82,82,0.3); padding: 0.35rem 0.8rem; font-size: 0.78rem; }
+        .btn-danger:hover { background: var(--danger); color: #fff; }
+        .btn-edit { background: rgba(240,165,0,0.15); color: var(--accent); border: 1px solid rgba(240,165,0,0.3); padding: 0.35rem 0.8rem; font-size: 0.78rem; }
+        .btn-edit:hover { background: var(--accent); color: #0a0e1a; }
+        .btn-profil { background: rgba(0,194,168,0.15); color: var(--accent2); border: 1px solid rgba(0,194,168,0.3); padding: 0.35rem 0.8rem; font-size: 0.78rem; }
+        .btn-profil:hover { background: var(--accent2); color: #0a0e1a; }
+        .btn-secondary { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+        .btn-secondary:hover { color: var(--text); }
+        .btn-row { display: flex; justify-content: flex-end; margin-top: 1rem; }
+
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        thead tr { border-bottom: 1px solid var(--border); }
+        th { padding: 0.8rem 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 500; }
+        td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: var(--surface2); }
+        .actions { display: flex; gap: 0.5rem; align-items: center; }
+
+        .badge { display: inline-block; padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+        .badge-green { background: rgba(62,207,142,0.15); color: var(--success); }
+        .badge-yellow { background: rgba(240,165,0,0.15); color: var(--accent); }
+
+        .quick-links { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+        .quick-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .quick-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+        .quick-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.3rem; }
+        .quick-desc { font-size: 0.78rem; color: var(--muted); }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 90%; max-width: 580px; }
+        .modal-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--accent); }
+        .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="logo">Tontine<span>TD</span></div>
+    <div class="logo-sub">Gestion de tontine</div>
+    <div class="nav-label">Navigation</div>
+    <button class="nav-item active" onclick="showSection('home', this)">Accueil</button>
+    <button class="nav-item" onclick="showSection('membres', this)">Membres</button>
+    <button class="nav-item" onclick="showSection('tontines', this)">Tontines</button>
+    <button class="nav-item" onclick="showSection('cotisations', this)">Cotisations</button>
+    <button class="nav-item" onclick="showSection('tours', this)">Tours</button>
+    <div class="sidebar-footer">TontineTD v1.0<br>Laravel 12</div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div class="page-title" id="pageTitle">Tableau de <span>bord</span></div>
+        <div class="badge-date" id="currentDate"></div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card accent"><div class="stat-label">Membres</div><div class="stat-value">{{ count($membres) }}</div></div>
+        <div class="stat-card teal"><div class="stat-label">Tontines</div><div class="stat-value">{{ count($tontines) }}</div></div>
+        <div class="stat-card green"><div class="stat-label">Cotisations</div><div class="stat-value">{{ count($cotisations) }}</div></div>
+        <div class="stat-card"><div class="stat-label">Tours</div><div class="stat-value">{{ count($tours) }}</div></div>
+    </div>
+
+    <!-- HOME -->
+    <div class="section active" id="section-home">
+        <div class="quick-links">
+            <div class="quick-card" onclick="showSection('membres', document.querySelector('[onclick*=membres]'))"><div class="quick-title">Membres</div><div class="quick-desc">Gérer les membres</div></div>
+            <div class="quick-card" onclick="showSection('tontines', document.querySelector('[onclick*=tontines]'))"><div class="quick-title">Tontines</div><div class="quick-desc">Gérer les tontines</div></div>
+            <div class="quick-card" onclick="showSection('cotisations', document.querySelector('[onclick*=cotisations]'))"><div class="quick-title">Cotisations</div><div class="quick-desc">Gérer les cotisations</div></div>
+            <div class="quick-card" onclick="showSection('tours', document.querySelector('[onclick*=tours]'))"><div class="quick-title">Tours</div><div class="quick-desc">Gérer les tours</div></div>
+        </div>
+    </div>
+
+    <!-- MEMBRES -->
+    <div class="section" id="section-membres">
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">Ajouter un membre</div></div>
+            <div class="panel-body">
+                <form action="/membre" method="post">
+                    @csrf
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Nom</label><input type="text" name="nom" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Prénom</label><input type="text" name="prenom" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Email</label><input type="email" name="email" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Téléphone</label><input type="text" name="telephone" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Adresse</label><input type="text" name="adresse" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Mot de passe</label><input type="password" name="password" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Date de naissance</label><input type="date" name="date_naissance" class="form-control" required></div>
+                    </div>
+                    <div class="btn-row"><button type="submit" class="btn btn-primary">Ajouter</button></div>
+                </form>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">Liste des membres</div></div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Nom</th><th>Prénom</th><th>Email</th>
+                            <th>Téléphone</th><th>Adresse</th><th>Naissance</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($membres as $m)
+                        <tr>
+                            <td>#{{ $m->id }}</td>
+                            <td>{{ $m->nom }}</td>
+                            <td>{{ $m->prenom }}</td>
+                            <td>{{ $m->email }}</td>
+                            <td>{{ $m->telephone }}</td>
+                            <td>{{ $m->adresse }}</td>
+                            <td>{{ $m->date_naissance }}</td>
+                            <td>
+                                <div class="actions">
+                                    <a href="/admin/membre/{{ $m->id }}" class="btn btn-profil">Voir profil</a>
+                                    <button class="btn btn-edit" onclick="openEditMembre({{ $m->id }},'{{ addslashes($m->nom) }}','{{ addslashes($m->prenom) }}','{{ $m->email }}','{{ $m->telephone }}','{{ addslashes($m->adresse) }}','{{ $m->date_naissance }}')">Modifier</button>
+                                    <form action="/membre/{{ $m->id }}" method="post" onsubmit="return confirm('Supprimer ce membre ?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TONTINES -->
+    <div class="section" id="section-tontines">
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">Créer une tontine</div></div>
+            <div class="panel-body">
+                <form action="/tontine" method="post">
+                    @csrf
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Nom</label><input type="text" name="nom" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Description</label><input type="text" name="description" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Montant (F CFA)</label><input type="number" name="montant" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Date début</label><input type="date" name="date_debut" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Date fin</label><input type="date" name="date_fin" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Fréquence</label>
+                            <select name="frequence" class="form-control">
+                                <option value="semaine">Hebdomadaire</option>
+                                <option value="mensuelle">Mensuelle</option>
+                                <option value="journalier">Journalier</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="btn-row"><button type="submit" class="btn btn-primary">Créer</button></div>
+                </form>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">Liste des tontines</div></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>ID</th><th>Nom</th><th>Description</th><th>Montant</th><th>Début</th><th>Fin</th><th>Fréquence</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        @foreach($tontines as $t)
+                        <tr>
+                            <td>#{{ $t->id }}</td><td>{{ $t->nom }}</td><td>{{ $t->description }}</td>
+                            <td>{{ number_format($t->montant, 0, ',', ' ') }} F</td>
+                            <td>{{ $t->date_debut }}</td><td>{{ $t->date_fin }}</td>
+                            <td><span class="badge badge-yellow">{{ $t->frequence }}</span></td>
+                            <td><div class="actions">
+                                <button class="btn btn-edit" onclick="openEditTontine({{ $t->id }},'{{ addslashes($t->nom) }}','{{ addslashes($t->description) }}',{{ $t->montant }},'{{ $t->date_debut }}','{{ $t->date_fin }}','{{ $t->frequence }}')">Modifier</button>
+                                <form action="/tontine/{{ $t->id }}" method="post" onsubmit="return confirm('Supprimer cette tontine ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
+                            </div></td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- COTISATIONS -->
+    <div class="section" id="section-cotisations">
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">Ajouter une cotisation</div></div>
+            <div class="panel-body">
+                <form action="/cotisation" method="post">
+                    @csrf
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Montant (F CFA)</label><input type="number" name="montant" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Date de cotisation</label><input type="date" name="date_cotisation" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Membre</label>
+                            <select name="membre_id" class="form-control">
+                                @foreach($membres as $m)
+                                <option value="{{ $m->id }}">{{ $m->nom }} {{ $m->prenom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="btn-row"><button type="submit" class="btn btn-primary">Enregistrer</button></div>
+                </form>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">Liste des cotisations</div></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>ID</th><th>Montant</th><th>Date</th><th>Membre</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        @foreach($cotisations as $c)
+                        <tr>
+                            <td>#{{ $c->id }}</td>
+                            <td>{{ number_format($c->montant, 0, ',', ' ') }} F</td>
+                            <td>{{ $c->date_cotisation }}</td>
+                            <td>{{ $c->membre->nom ?? '—' }} {{ $c->membre->prenom ?? '' }}</td>
+                            <td><div class="actions">
+                                <button class="btn btn-edit" onclick="openEditCotisation({{ $c->id }},{{ $c->montant }},'{{ $c->date_cotisation }}',{{ $c->membre_id }})">Modifier</button>
+                                <form action="/cotisation/{{ $c->id }}" method="post" onsubmit="return confirm('Supprimer cette cotisation ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
+                            </div></td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOURS -->
+    <div class="section" id="section-tours">
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">Ajouter un tour</div></div>
+            <div class="panel-body">
+                <form action="/tour" method="post">
+                    @csrf
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Date du tour</label><input type="date" name="date_tour" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">État</label>
+                            <select name="etat" class="form-control">
+                                <option value="en_attente">En attente</option>
+                                <option value="terminer">Terminé</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="btn-row"><button type="submit" class="btn btn-primary">Ajouter</button></div>
+                </form>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">Liste des tours</div></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>ID</th><th>Date</th><th>État</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        @foreach($tours as $tour)
+                        <tr>
+                            <td>#{{ $tour->id }}</td>
+                            <td>{{ $tour->date_tour }}</td>
+                            <td><span class="badge {{ $tour->etat === 'terminer' ? 'badge-green' : 'badge-yellow' }}">{{ $tour->etat === 'terminer' ? 'Terminé' : 'En attente' }}</span></td>
+                            <td><div class="actions">
+                                <button class="btn btn-edit" onclick="openEditTour({{ $tour->id }},'{{ $tour->date_tour }}','{{ $tour->etat }}')">Modifier</button>
+                                <form action="/tour/{{ $tour->id }}" method="post" onsubmit="return confirm('Supprimer ce tour ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
+                            </div></td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- MODAL MODIFIER MEMBRE -->
+<div class="modal-overlay" id="modalMembre">
+    <div class="modal">
+        <div class="modal-title">Modifier le membre</div>
+        <form id="formEditMembre" method="post">@csrf @method('PUT')
+            <div class="form-grid">
+                <div class="form-group"><label class="form-label">Nom</label><input type="text" name="nom" id="e_nom" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Prénom</label><input type="text" name="prenom" id="e_prenom" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Email</label><input type="email" name="email" id="e_email" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Téléphone</label><input type="text" name="telephone" id="e_tel" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Adresse</label><input type="text" name="adresse" id="e_adr" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Date naissance</label><input type="date" name="date_naissance" id="e_dn" class="form-control" required></div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalMembre')">Annuler</button>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL MODIFIER TONTINE -->
+<div class="modal-overlay" id="modalTontine">
+    <div class="modal">
+        <div class="modal-title">Modifier la tontine</div>
+        <form id="formEditTontine" method="post">@csrf @method('PUT')
+            <div class="form-grid">
+                <div class="form-group"><label class="form-label">Nom</label><input type="text" name="nom" id="et_nom" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Description</label><input type="text" name="description" id="et_desc" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Montant</label><input type="number" name="montant" id="et_montant" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Date début</label><input type="date" name="date_debut" id="et_debut" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Date fin</label><input type="date" name="date_fin" id="et_fin" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Fréquence</label>
+                    <select name="frequence" id="et_freq" class="form-control">
+                        <option value="semaine">Hebdomadaire</option>
+                        <option value="mensuelle">Mensuelle</option>
+                        <option value="journalier">Journalier</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalTontine')">Annuler</button>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL MODIFIER COTISATION -->
+<div class="modal-overlay" id="modalCotisation">
+    <div class="modal">
+        <div class="modal-title">Modifier la cotisation</div>
+        <form id="formEditCotisation" method="post">@csrf @method('PUT')
+            <div class="form-grid">
+                <div class="form-group"><label class="form-label">Montant</label><input type="number" name="montant" id="ec_montant" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Date</label><input type="date" name="date_cotisation" id="ec_date" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">Membre</label>
+                    <select name="membre_id" id="ec_membre" class="form-control">
+                        @foreach($membres as $m)
+                        <option value="{{ $m->id }}">{{ $m->nom }} {{ $m->prenom }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalCotisation')">Annuler</button>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL MODIFIER TOUR -->
+<div class="modal-overlay" id="modalTour">
+    <div class="modal">
+        <div class="modal-title">Modifier le tour</div>
+        <form id="formEditTour" method="post">@csrf @method('PUT')
+            <div class="form-grid">
+                <div class="form-group"><label class="form-label">Date du tour</label><input type="date" name="date_tour" id="etour_date" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">État</label>
+                    <select name="etat" id="etour_etat" class="form-control">
+                        <option value="en_attente">En attente</option>
+                        <option value="terminer">Terminé</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalTour')">Annuler</button>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    const titles = {
+        home: 'Tableau de <span>bord</span>',
+        membres: 'Gestion des <span>membres</span>',
+        tontines: 'Gestion des <span>tontines</span>',
+        cotisations: 'Gestion des <span>cotisations</span>',
+        tours: 'Gestion des <span>tours</span>',
+    };
+
+    function showSection(name, btn) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('section-' + name).classList.add('active');
+        if (btn) btn.classList.add('active');
+        document.getElementById('pageTitle').innerHTML = titles[name] || name;
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    function openEditMembre(id, nom, prenom, email, tel, adr, dn) {
+        document.getElementById('formEditMembre').action = '/membre/' + id;
+        document.getElementById('e_nom').value = nom;
+        document.getElementById('e_prenom').value = prenom;
+        document.getElementById('e_email').value = email;
+        document.getElementById('e_tel').value = tel;
+        document.getElementById('e_adr').value = adr;
+        document.getElementById('e_dn').value = dn;
+        document.getElementById('modalMembre').classList.add('open');
+    }
+
+    function openEditTontine(id, nom, desc, montant, debut, fin, freq) {
+        document.getElementById('formEditTontine').action = '/tontine/' + id;
+        document.getElementById('et_nom').value = nom;
+        document.getElementById('et_desc').value = desc;
+        document.getElementById('et_montant').value = montant;
+        document.getElementById('et_debut').value = debut;
+        document.getElementById('et_fin').value = fin;
+        document.getElementById('et_freq').value = freq;
+        document.getElementById('modalTontine').classList.add('open');
+    }
+
+    function openEditCotisation(id, montant, date, membre_id) {
+        document.getElementById('formEditCotisation').action = '/cotisation/' + id;
+        document.getElementById('ec_montant').value = montant;
+        document.getElementById('ec_date').value = date;
+        document.getElementById('ec_membre').value = membre_id;
+        document.getElementById('modalCotisation').classList.add('open');
+    }
+
+    function openEditTour(id, date, etat) {
+        document.getElementById('formEditTour').action = '/tour/' + id;
+        document.getElementById('etour_date').value = date;
+        document.getElementById('etour_etat').value = etat;
+        document.getElementById('modalTour').classList.add('open');
+    }
+
+    document.querySelectorAll('.modal-overlay').forEach(o => {
+        o.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+    });
+</script>
+</body>
+</html>
