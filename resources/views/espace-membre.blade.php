@@ -172,4 +172,105 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Date</label>
-                            <input type="date" name="date_cotisation" class="form-control"
+                            <input type="date" name="date_cotisation" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Ajouter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">Mes cotisations</div>
+                <div class="export-btns">
+                    <a href="/mon-espace/export/pdf" class="btn btn-pdf">PDF</a>
+                    <a href="/mon-espace/export/excel" class="btn btn-excel">Excel</a>
+                </div>
+            </div>
+            <div class="table-wrap">
+                @if($membre->cotisations->count() > 0)
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Montant</th>
+                            <th>Date</th>
+                            <th>Ajouté par</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($membre->cotisations as $c)
+                        <tr>
+                            <td>#{{ $c->id }}</td>
+                            <td>{{ number_format($c->montant, 0, ',', ' ') }} F CFA</td>
+                            <td>{{ \Carbon\Carbon::parse($c->date_cotisation)->format('d/m/Y') }}</td>
+                            <td>
+                                @if(isset($c->ajout_par) && $c->ajout_par === 'membre')
+                                <span class="badge-membre">Moi</span>
+                                @else
+                                <span class="badge-admin">Admin</span>
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                @else
+                <div class="empty">Aucune cotisation enregistrée.</div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="section" id="section-notifications">
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">Mes notifications</div></div>
+            @if($membre->notifications->count() > 0)
+                @foreach($membre->notifications as $notif)
+                <div class="notif-item {{ !$notif->lu ? 'non-lu' : '' }}">
+                    <div style="flex:1">
+                        <div class="notif-titre">{{ $notif->titre }}</div>
+                        <div class="notif-msg">{{ $notif->message }}</div>
+                        <div class="notif-date">{{ \Carbon\Carbon::parse($notif->created_at)->locale('fr')->diffForHumans() }}</div>
+                    </div>
+                    @if(!$notif->lu)
+                    <div style="display:flex;align-items:center;gap:0.5rem">
+                        <div class="notif-dot"></div>
+                        <form action="/mon-espace/notif/{{ $notif->id }}/lu" method="post">
+                            @csrf
+                            <button type="submit" class="btn btn-lu">Marquer lu</button>
+                        </form>
+                    </div>
+                    @endif
+                </div>
+                @endforeach
+            @else
+            <div class="empty">Aucune notification pour le moment.</div>
+            @endif
+        </div>
+    </div>
+</main>
+
+<script>
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('fr-FR', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    const titles = {
+        accueil: 'Mon <span>espace</span>',
+        cotisations: 'Mes <span>cotisations</span>',
+        notifications: 'Mes <span>notifications</span>',
+    };
+
+    function showSection(name, btn) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('section-' + name).classList.add('active');
+        if (btn) btn.classList.add('active');
+        document.getElementById('pageTitle').innerHTML = titles[name] || name;
+    }
+</script>
+</body>
+</html>
