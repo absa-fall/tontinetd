@@ -27,7 +27,6 @@ Route::post('/register', [LoginController::class, 'register']);
 // Espace membre
 Route::get('/mon-espace', [EspaceMembreController::class, 'index']);
 Route::post('/mon-espace/cotisation', [EspaceMembreController::class, 'ajouterCotisation']);
-Route::put('/mon-espace/cotisation/{id}', [EspaceMembreController::class, 'modifierCotisation']);
 Route::post('/mon-espace/notif/{id}/lu', [EspaceMembreController::class, 'marquerLu']);
 Route::get('/mon-espace/export/pdf', [EspaceMembreController::class, 'exportPdf']);
 Route::get('/mon-espace/export/excel', [EspaceMembreController::class, 'exportExcel']);

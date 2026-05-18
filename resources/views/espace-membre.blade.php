@@ -56,8 +56,6 @@
         .btn-pdf:hover { background: var(--danger); color: #fff; }
         .btn-excel { background: rgba(62,207,142,0.15); color: var(--success); border: 1px solid rgba(62,207,142,0.3); }
         .btn-excel:hover { background: var(--success); color: #fff; }
-        .btn-edit { background: rgba(240,165,0,0.15); color: var(--accent); border: 1px solid rgba(240,165,0,0.3); padding: 0.3rem 0.7rem; font-size: 0.75rem; }
-        .btn-edit:hover { background: var(--accent); color: #0a0e1a; }
         .btn-lu { background: rgba(240,165,0,0.15); color: var(--accent); border: 1px solid rgba(240,165,0,0.3); padding: 0.3rem 0.7rem; font-size: 0.75rem; }
         .btn-lu:hover { background: var(--accent); color: #0a0e1a; }
 
@@ -88,13 +86,6 @@
 
         .badge-membre { background: rgba(240,165,0,0.15); color: var(--accent); border: 1px solid rgba(240,165,0,0.3); padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
         .badge-admin { background: rgba(0,194,168,0.15); color: var(--accent2); border: 1px solid rgba(0,194,168,0.3); padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
-
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-overlay.open { display: flex; }
-        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 90%; max-width: 420px; }
-        .modal-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--accent); }
-        .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; }
-        .btn-secondary { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); padding: 0.65rem 1.5rem; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 600; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -181,149 +172,4 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Date</label>
-                            <input type="date" name="date_cotisation" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Ajouter</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="panel">
-            <div class="panel-header">
-                <div class="panel-title">Mes cotisations</div>
-                <div class="export-btns">
-                    <a href="/mon-espace/export/pdf" class="btn btn-pdf">PDF</a>
-                    <a href="/mon-espace/export/excel" class="btn btn-excel">Excel</a>
-                </div>
-            </div>
-            <div class="table-wrap">
-                @if($membre->cotisations->count() > 0)
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Montant</th>
-                            <th>Date</th>
-                            <th>Ajouté par</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($membre->cotisations as $c)
-                        <tr>
-                            <td>#{{ $c->id }}</td>
-                            <td>{{ number_format($c->montant, 0, ',', ' ') }} F CFA</td>
-                            <td>{{ \Carbon\Carbon::parse($c->date_cotisation)->format('d/m/Y') }}</td>
-                            <td>
-                                @if(isset($c->ajout_par) && $c->ajout_par === 'membre')
-                                <span class="badge-membre">Moi</span>
-                                @else
-                                <span class="badge-admin">Admin</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if(isset($c->ajout_par) && $c->ajout_par === 'membre')
-                                <button class="btn btn-edit" onclick="openEditCotisation({{ $c->id }}, {{ $c->montant }}, '{{ $c->date_cotisation }}')">Modifier</button>
-                                @else
-                                <span style="color:var(--muted);font-size:0.78rem;">—</span>
-                                @endif
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                @else
-                <div class="empty">Aucune cotisation enregistrée.</div>
-                @endif
-            </div>
-        </div>
-    </div>
-
-    <!-- NOTIFICATIONS -->
-    <div class="section" id="section-notifications">
-        <div class="panel">
-            <div class="panel-header"><div class="panel-title">Mes notifications</div></div>
-            @if($membre->notifications->count() > 0)
-                @foreach($membre->notifications as $notif)
-                <div class="notif-item {{ !$notif->lu ? 'non-lu' : '' }}">
-                    <div style="flex:1">
-                        <div class="notif-titre">{{ $notif->titre }}</div>
-                        <div class="notif-msg">{{ $notif->message }}</div>
-                        <div class="notif-date">{{ \Carbon\Carbon::parse($notif->created_at)->locale('fr')->diffForHumans() }}</div>
-                    </div>
-                    @if(!$notif->lu)
-                    <div style="display:flex;align-items:center;gap:0.5rem">
-                        <div class="notif-dot"></div>
-                        <form action="/mon-espace/notif/{{ $notif->id }}/lu" method="post">
-                            @csrf
-                            <button type="submit" class="btn btn-lu">Marquer lu</button>
-                        </form>
-                    </div>
-                    @endif
-                </div>
-                @endforeach
-            @else
-            <div class="empty">Aucune notification pour le moment.</div>
-            @endif
-        </div>
-    </div>
-</main>
-
-<!-- MODAL MODIFIER COTISATION -->
-<div class="modal-overlay" id="modalEditCotisation">
-    <div class="modal">
-        <div class="modal-title">Modifier la cotisation</div>
-        <form id="formEditCotisation" method="POST">
-            @csrf
-            @method('PUT')
-            <div class="form-group" style="margin-bottom:1rem;">
-                <label class="form-label">Montant (F CFA)</label>
-                <input type="number" name="montant" id="edit_montant" class="form-control" style="width:100%;" required>
-            </div>
-            <div class="form-group" style="margin-bottom:1rem;">
-                <label class="form-label">Date</label>
-                <input type="date" name="date_cotisation" id="edit_date" class="form-control" style="width:100%;" required>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn-secondary" onclick="closeEditModal()">Annuler</button>
-                <button type="submit" class="btn btn-primary">Enregistrer</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-    const titles = {
-        accueil: 'Mon <span>espace</span>',
-        cotisations: 'Mes <span>cotisations</span>',
-        notifications: 'Mes <span>notifications</span>',
-    };
-
-    function showSection(name, btn) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('section-' + name).classList.add('active');
-        if (btn) btn.classList.add('active');
-        document.getElementById('pageTitle').innerHTML = titles[name] || name;
-    }
-
-    function openEditCotisation(id, montant, date) {
-        document.getElementById('formEditCotisation').action = '/mon-espace/cotisation/' + id;
-        document.getElementById('edit_montant').value = montant;
-        document.getElementById('edit_date').value = date;
-        document.getElementById('modalEditCotisation').classList.add('open');
-    }
-
-    function closeEditModal() {
-        document.getElementById('modalEditCotisation').classList.remove('open');
-    }
-
-    document.getElementById('modalEditCotisation').addEventListener('click', function(e) {
-        if (e.target === this) closeEditModal();
-    });
-</script>
-</body>
-</html>
+                            <input type="date" name="date_cotisation" class="form-control"

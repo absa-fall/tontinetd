@@ -47,29 +47,6 @@ class EspaceMembreController extends Controller
         return back()->with('success', 'Cotisation ajoutée avec succès !');
     }
 
-    public function modifierCotisation(Request $request, $id)
-    {
-        $membre = $this->getMembre();
-        if (!$membre) return redirect('/login');
-
-        $cotisation = Cotisation::where('id', $id)
-            ->where('membre_id', $membre->id)
-            ->where('ajout_par', 'membre')
-            ->firstOrFail();
-
-        $request->validate([
-            'montant'         => 'required|numeric|min:1',
-            'date_cotisation' => 'required|date',
-        ]);
-
-        $cotisation->update([
-            'montant'         => $request->montant,
-            'date_cotisation' => $request->date_cotisation,
-        ]);
-
-        return back()->with('success', 'Cotisation modifiée avec succès !');
-    }
-
     public function marquerLu($id)
     {
         $notif = NotificationMembre::find($id);
