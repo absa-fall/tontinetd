@@ -15,19 +15,25 @@ class ControlleurTour extends Controller
     public function store(Request $request)
     {
         Tour::create($request->all());
-        return redirect('/');
+        return redirect('/dashboard')
+            ->with('success', 'Tour ajouté avec succès !')
+            ->with('section', 'tours');
     }
 
     public function update(Request $request, $id)
     {
         $tour = Tour::findOrFail($id);
         $tour->update($request->except(['_token', '_method']));
-        return redirect('/');
+        return redirect('/dashboard')
+            ->with('success', 'Tour modifié avec succès !')
+            ->with('section', 'tours');
     }
 
     public function destroy($id)
     {
         Tour::findOrFail($id)->delete();
-        return redirect('/');
+        return redirect('/dashboard')
+            ->with('success', 'Tour supprimé !')
+            ->with('section', 'tours');
     }
 }

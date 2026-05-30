@@ -15,7 +15,6 @@
 
         .layout { display: grid; grid-template-columns: 380px 1fr; gap: 2rem; align-items: start; }
 
-        /* FORMULAIRE */
         .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; }
         .form-card h2 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1.2rem; color: var(--accent); }
         .form-group { margin-bottom: 1rem; }
@@ -26,7 +25,6 @@
         .btn-submit { width: 100%; padding: 0.85rem; background: var(--accent); color: #0a0e1a; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: opacity 0.2s; margin-top: 0.5rem; }
         .btn-submit:hover { opacity: 0.85; }
 
-        /* TABLEAU */
         .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
         .panel-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
         .table-wrap { overflow-x: auto; }
@@ -45,14 +43,13 @@
         .back-btn { display: inline-block; margin-bottom: 1.5rem; padding: 0.5rem 1.2rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 0.85rem; }
         .back-btn:hover { color: var(--text); }
 
-        @if(session('success'))
         .alert-success { background: rgba(62,207,142,0.1); border: 1px solid rgba(62,207,142,0.3); color: var(--success); padding: 0.8rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; }
-        @endif
+        .alert-password { background: rgba(240,165,0,0.1); border: 1px solid rgba(240,165,0,0.4); color: var(--accent); padding: 0.8rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 600; }
     </style>
 </head>
 <body>
 
-    <a href="/" class="back-btn">← Tableau de bord</a>
+    <a href="/dashboard" class="back-btn">← Tableau de bord</a>
 
     <div class="page-title">Gestion des <span>Membres</span></div>
 
@@ -86,10 +83,6 @@
                 <div class="form-group">
                     <label>Adresse</label>
                     <input type="text" name="adresse" placeholder="Adresse" required>
-                </div>
-                <div class="form-group">
-                    <label>Mot de passe</label>
-                    <input type="password" name="password" placeholder="Mot de passe" required>
                 </div>
                 <div class="form-group">
                     <label>Date de naissance</label>

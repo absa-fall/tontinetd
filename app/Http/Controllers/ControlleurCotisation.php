@@ -17,19 +17,25 @@ class ControlleurCotisation extends Controller
     public function store(Request $request)
     {
         Cotisation::create($request->all());
-        return redirect('/');
+        return redirect('/dashboard')
+            ->with('success', 'Cotisation ajoutée avec succès !')
+            ->with('section', 'cotisations');
     }
 
     public function update(Request $request, $id)
     {
         $cotisation = Cotisation::findOrFail($id);
         $cotisation->update($request->except(['_token', '_method']));
-        return redirect('/');
+        return redirect('/dashboard')
+            ->with('success', 'Cotisation modifiée avec succès !')
+            ->with('section', 'cotisations');
     }
 
     public function destroy($id)
     {
         Cotisation::findOrFail($id)->delete();
-        return redirect('/');
+        return redirect('/dashboard')
+            ->with('success', 'Cotisation supprimée !')
+            ->with('section', 'cotisations');
     }
 }

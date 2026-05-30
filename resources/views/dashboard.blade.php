@@ -23,6 +23,8 @@
         .nav-item:hover, .nav-item.active { background: var(--surface2); color: var(--text); }
         .nav-item.active { color: var(--accent); }
         .sidebar-footer { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--muted); text-align: center; }
+        .btn-logout { width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid rgba(224,82,82,0.3); background: rgba(224,82,82,0.1); color: var(--danger); font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-top: 1rem; }
+        .btn-logout:hover { background: var(--danger); color: #fff; }
 
         .main { margin-left: 240px; flex: 1; padding: 2rem 2.5rem; min-height: 100vh; }
         .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
@@ -41,6 +43,8 @@
 
         .section { display: none; }
         .section.active { display: block; }
+
+        .alert-success { background: rgba(62,207,142,0.1); border: 1px solid rgba(62,207,142,0.3); color: var(--success); padding: 0.8rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; }
 
         .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; }
         .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); }
@@ -99,12 +103,18 @@
     <div class="logo">Tontine<span>TD</span></div>
     <div class="logo-sub">Gestion de tontine</div>
     <div class="nav-label">Navigation</div>
-    <button class="nav-item active" onclick="showSection('home', this)">Accueil</button>
-    <button class="nav-item" onclick="showSection('membres', this)">Membres</button>
-    <button class="nav-item" onclick="showSection('tontines', this)">Tontines</button>
-    <button class="nav-item" onclick="showSection('cotisations', this)">Cotisations</button>
-    <button class="nav-item" onclick="showSection('tours', this)">Tours</button>
-    <div class="sidebar-footer">TontineTD v1.0<br>Laravel 12</div>
+    <button class="nav-item {{ session('section') === 'home' || !session('section') ? 'active' : '' }}" onclick="showSection('home', this)">Accueil</button>
+    <button class="nav-item {{ session('section') === 'membres' ? 'active' : '' }}" onclick="showSection('membres', this)">Membres</button>
+    <button class="nav-item {{ session('section') === 'tontines' ? 'active' : '' }}" onclick="showSection('tontines', this)">Tontines</button>
+    <button class="nav-item {{ session('section') === 'cotisations' ? 'active' : '' }}" onclick="showSection('cotisations', this)">Cotisations</button>
+    <button class="nav-item {{ session('section') === 'tours' ? 'active' : '' }}" onclick="showSection('tours', this)">Tours</button>
+    <div class="sidebar-footer">
+        TontineTD v1.0<br>Laravel 12
+        <form action="/logout" method="post">
+            @csrf
+            <button type="submit" class="btn-logout">Se déconnecter</button>
+        </form>
+    </div>
 </aside>
 
 <main class="main">
@@ -112,6 +122,10 @@
         <div class="page-title" id="pageTitle">Tableau de <span>bord</span></div>
         <div class="badge-date" id="currentDate"></div>
     </div>
+
+    @if(session('success'))
+    <div class="alert-success">{{ session('success') }}</div>
+    @endif
 
     <div class="stats-grid">
         <div class="stat-card accent"><div class="stat-label">Membres</div><div class="stat-value">{{ count($membres) }}</div></div>
@@ -121,7 +135,7 @@
     </div>
 
     <!-- HOME -->
-    <div class="section active" id="section-home">
+    <div class="section {{ !session('section') || session('section') === 'home' ? 'active' : '' }}" id="section-home">
         <div class="quick-links">
             <div class="quick-card" onclick="showSection('membres', document.querySelector('[onclick*=membres]'))"><div class="quick-title">Membres</div><div class="quick-desc">Gérer les membres</div></div>
             <div class="quick-card" onclick="showSection('tontines', document.querySelector('[onclick*=tontines]'))"><div class="quick-title">Tontines</div><div class="quick-desc">Gérer les tontines</div></div>
@@ -131,7 +145,7 @@
     </div>
 
     <!-- MEMBRES -->
-    <div class="section" id="section-membres">
+    <div class="section {{ session('section') === 'membres' ? 'active' : '' }}" id="section-membres">
         <div class="panel">
             <div class="panel-header"><div class="panel-title">Ajouter un membre</div></div>
             <div class="panel-body">
@@ -143,7 +157,6 @@
                         <div class="form-group"><label class="form-label">Email</label><input type="email" name="email" class="form-control" required></div>
                         <div class="form-group"><label class="form-label">Téléphone</label><input type="text" name="telephone" class="form-control" required></div>
                         <div class="form-group"><label class="form-label">Adresse</label><input type="text" name="adresse" class="form-control" required></div>
-                        <div class="form-group"><label class="form-label">Mot de passe</label><input type="password" name="password" class="form-control" required></div>
                         <div class="form-group"><label class="form-label">Date de naissance</label><input type="date" name="date_naissance" class="form-control" required></div>
                     </div>
                     <div class="btn-row"><button type="submit" class="btn btn-primary">Ajouter</button></div>
@@ -155,10 +168,7 @@
             <div class="table-wrap">
                 <table>
                     <thead>
-                        <tr>
-                            <th>ID</th><th>Nom</th><th>Prénom</th><th>Email</th>
-                            <th>Téléphone</th><th>Adresse</th><th>Naissance</th><th>Actions</th>
-                        </tr>
+                        <tr><th>ID</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Adresse</th><th>Naissance</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
                         @foreach($membres as $m)
@@ -189,7 +199,7 @@
     </div>
 
     <!-- TONTINES -->
-    <div class="section" id="section-tontines">
+    <div class="section {{ session('section') === 'tontines' ? 'active' : '' }}" id="section-tontines">
         <div class="panel">
             <div class="panel-header"><div class="panel-title">Créer une tontine</div></div>
             <div class="panel-body">
@@ -238,7 +248,7 @@
     </div>
 
     <!-- COTISATIONS -->
-    <div class="section" id="section-cotisations">
+    <div class="section {{ session('section') === 'cotisations' ? 'active' : '' }}" id="section-cotisations">
         <div class="panel">
             <div class="panel-header"><div class="panel-title">Ajouter une cotisation</div></div>
             <div class="panel-body">
@@ -284,7 +294,7 @@
     </div>
 
     <!-- TOURS -->
-    <div class="section" id="section-tours">
+    <div class="section {{ session('section') === 'tours' ? 'active' : '' }}" id="section-tours">
         <div class="panel">
             <div class="panel-header"><div class="panel-title">Ajouter un tour</div></div>
             <div class="panel-body">
@@ -431,6 +441,13 @@
         cotisations: 'Gestion des <span>cotisations</span>',
         tours: 'Gestion des <span>tours</span>',
     };
+
+    // Mettre le bon titre selon la section active au chargement
+    const activeSection = document.querySelector('.section.active');
+    if (activeSection) {
+        const name = activeSection.id.replace('section-', '');
+        document.getElementById('pageTitle').innerHTML = titles[name] || name;
+    }
 
     function showSection(name, btn) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));

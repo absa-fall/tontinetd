@@ -11,9 +11,8 @@ class LoginController extends Controller
 {
     public function showLogin()
     {
-        if (Session::get('membre_id')) {
-            return redirect('/mon-espace');
-        }
+        if (Session::get('is_admin')) return redirect('/dashboard');
+        if (Session::get('membre_id')) return redirect('/mon-espace');
         return view('login');
     }
 
@@ -24,6 +23,13 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
+        // ADMIN
+        if ($request->email === 'admin@tontinetd.sn' && $request->password === 'TontineTD@2026') {
+            Session::put('is_admin', true);
+            return redirect('/dashboard');
+        }
+
+        // MEMBRE
         $membre = Membre::where('email', $request->email)->first();
 
         if (!$membre || !Hash::check($request->password, $membre->password)) {
@@ -32,15 +38,14 @@ class LoginController extends Controller
 
         Session::put('membre_id', $membre->id);
         Session::put('membre_nom', $membre->nom . ' ' . $membre->prenom);
+        Session::put('is_admin', false);
 
         return redirect('/mon-espace');
     }
 
     public function showRegister()
     {
-        if (Session::get('membre_id')) {
-            return redirect('/mon-espace');
-        }
+        if (Session::get('membre_id')) return redirect('/mon-espace');
         return view('register');
     }
 
@@ -68,13 +73,33 @@ class LoginController extends Controller
 
         Session::put('membre_id', $membre->id);
         Session::put('membre_nom', $membre->nom . ' ' . $membre->prenom);
+        Session::put('is_admin', false);
 
         return redirect('/mon-espace')->with('success', 'Compte créé avec succès !');
     }
 
     public function logout()
     {
-        Session::forget(['membre_id', 'membre_nom']);
+        Session::forget(['membre_id', 'membre_nom', 'is_admin']);
         return redirect('/login');
+    }
+
+    public function changerMotDePasse(Request $request)
+    {
+        $membre = Membre::find(Session::get('membre_id'));
+        if (!$membre) return redirect('/login');
+
+        $request->validate([
+            'ancien_password' => 'required',
+            'password'        => 'required|min:6|confirmed',
+        ]);
+
+        if (!Hash::check($request->ancien_password, $membre->password)) {
+            return back()->withErrors(['ancien_password' => 'Ancien mot de passe incorrect.']);
+        }
+
+        $membre->update(['password' => Hash::make($request->password)]);
+
+        return back()->with('success', 'Mot de passe modifié avec succès !');
     }
 }

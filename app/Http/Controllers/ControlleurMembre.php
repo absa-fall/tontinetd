@@ -28,9 +28,10 @@ class ControlleurMembre extends Controller
             'email'          => 'required|email|unique:membres,email',
             'telephone'      => 'required|string|max:20',
             'adresse'        => 'required|string|max:255',
-            'password'       => 'required|string|min:6',
             'date_naissance' => 'required|date',
         ]);
+
+        $passwordParDefaut = '1234' . $request->nom;
 
         Membre::create([
             'nom'            => $request->nom,
@@ -38,11 +39,13 @@ class ControlleurMembre extends Controller
             'email'          => $request->email,
             'telephone'      => $request->telephone,
             'adresse'        => $request->adresse,
-            'password'       => Hash::make($request->password),
+            'password'       => Hash::make($passwordParDefaut),
             'date_naissance' => $request->date_naissance,
         ]);
 
-        return redirect('/membres')->with('success', 'Membre ajouté avec succès !');
+        return redirect('/dashboard')
+            ->with('success', 'Membre ajouté ! Mot de passe par défaut : ' . $passwordParDefaut)
+            ->with('section', 'membres');
     }
 
     public function update(Request $request, $id)
@@ -73,12 +76,16 @@ class ControlleurMembre extends Controller
 
         $membre->update($data);
 
-        return redirect('/membres')->with('success', 'Membre mis à jour !');
+        return redirect('/dashboard')
+            ->with('success', 'Membre mis à jour !')
+            ->with('section', 'membres');
     }
 
     public function destroy($id)
     {
         Membre::findOrFail($id)->delete();
-        return redirect('/membres')->with('success', 'Membre supprimé !');
+        return redirect('/dashboard')
+            ->with('success', 'Membre supprimé !')
+            ->with('section', 'membres');
     }
 }

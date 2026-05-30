@@ -15,19 +15,25 @@ class ControlleurTontine extends Controller
     public function store(Request $request)
     {
         Tontine::create($request->all());
-        return redirect('/');
+        return redirect('/dashboard')
+            ->with('success', 'Tontine créée avec succès !')
+            ->with('section', 'tontines');
     }
 
     public function update(Request $request, $id)
     {
         $tontine = Tontine::findOrFail($id);
         $tontine->update($request->except(['_token', '_method']));
-        return redirect('/');
+        return redirect('/dashboard')
+            ->with('success', 'Tontine modifiée avec succès !')
+            ->with('section', 'tontines');
     }
 
     public function destroy($id)
     {
         Tontine::findOrFail($id)->delete();
-        return redirect('/');
+        return redirect('/dashboard')
+            ->with('success', 'Tontine supprimée !')
+            ->with('section', 'tontines');
     }
 }

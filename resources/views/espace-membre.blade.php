@@ -64,8 +64,11 @@
         .form-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
         .form-control { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; color: var(--text); font-size: 0.9rem; outline: none; width: 200px; }
         .form-control:focus { border-color: var(--accent); }
+        .form-control-full { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; color: var(--text); font-size: 0.9rem; outline: none; width: 100%; }
+        .form-control-full:focus { border-color: var(--accent); }
 
         .alert-success { background: rgba(62,207,142,0.1); border: 1px solid rgba(62,207,142,0.3); color: var(--success); padding: 0.8rem 1.2rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; }
+        .alert-error { background: rgba(224,82,82,0.1); border: 1px solid rgba(224,82,82,0.3); color: var(--danger); padding: 0.8rem 1.2rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; }
 
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
@@ -86,6 +89,9 @@
 
         .badge-membre { background: rgba(240,165,0,0.15); color: var(--accent); border: 1px solid rgba(240,165,0,0.3); padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
         .badge-admin { background: rgba(0,194,168,0.15); color: var(--accent2); border: 1px solid rgba(0,194,168,0.3); padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+
+        .form-stack { display: flex; flex-direction: column; gap: 1rem; max-width: 400px; }
+        .form-stack .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
     </style>
 </head>
 <body>
@@ -107,6 +113,7 @@
         <span class="notif-badge">{{ $membre->notificationsNonLues()->count() }}</span>
         @endif
     </button>
+    <button class="nav-item" onclick="showSection('securite', this)">Sécurité</button>
 
     <div class="sidebar-footer">
         <form action="/logout" method="post">
@@ -251,6 +258,45 @@
             @endif
         </div>
     </div>
+
+    <!-- SECURITE -->
+    <div class="section" id="section-securite">
+
+        @if(session('success'))
+        <div class="alert-success">{{ session('success') }}</div>
+        @endif
+
+        @if($errors->has('ancien_password'))
+        <div class="alert-error">{{ $errors->first('ancien_password') }}</div>
+        @endif
+
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">Changer mon mot de passe</div>
+            </div>
+            <div class="panel-body">
+                <form method="POST" action="/changer-password">
+                    @csrf
+                    <div class="form-stack">
+                        <div class="form-group">
+                            <label class="form-label">Ancien mot de passe</label>
+                            <input type="password" name="ancien_password" class="form-control-full" placeholder="Ancien mot de passe" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nouveau mot de passe</label>
+                            <input type="password" name="password" class="form-control-full" placeholder="Nouveau mot de passe (min. 6 caractères)" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Confirmer le nouveau mot de passe</label>
+                            <input type="password" name="password_confirmation" class="form-control-full" placeholder="Confirmer le mot de passe" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width:fit-content">Modifier le mot de passe</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </main>
 
 <script>
@@ -262,6 +308,7 @@
         accueil: 'Mon <span>espace</span>',
         cotisations: 'Mes <span>cotisations</span>',
         notifications: 'Mes <span>notifications</span>',
+        securite: 'Ma <span>sécurité</span>',
     };
 
     function showSection(name, btn) {
@@ -271,6 +318,14 @@
         if (btn) btn.classList.add('active');
         document.getElementById('pageTitle').innerHTML = titles[name] || name;
     }
+
+    // Auto-ouvrir section sécurité si erreur ou succès mot de passe
+    @if($errors->has('ancien_password'))
+        showSection('securite', document.querySelectorAll('.nav-item')[3]);
+    @endif
+    @if(session('success') && request()->is('*changer*'))
+        showSection('securite', document.querySelectorAll('.nav-item')[3]);
+    @endif
 </script>
 </body>
 </html>
