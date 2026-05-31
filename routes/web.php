@@ -91,3 +91,4 @@ Route::get('/admin/export/pdf/{id}', [AdminExportController::class, 'pdfMembre']
 Route::get('/admin/export/excel/{id}', [AdminExportController::class, 'excelMembre']);
 Route::get('/admin/export/global/pdf', [AdminExportController::class, 'pdfGlobal']);
 Route::post('/admin/notifier-tour/{tourId}', [AdminExportController::class, 'notifierTour']);
+Route::get('/admin/membre/{id}', [ControlleurMembre::class, 'show']);

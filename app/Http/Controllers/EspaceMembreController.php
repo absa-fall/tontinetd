@@ -42,6 +42,7 @@ class EspaceMembreController extends Controller
             'date_cotisation' => $request->date_cotisation,
             'membre_id'       => $membre->id,
             'ajout_par'       => 'membre',
+            'moyen_paiement'  => $request->moyen_paiement ?? 'cash',
         ]);
 
         return back()->with('success', 'Cotisation ajoutée avec succès !');

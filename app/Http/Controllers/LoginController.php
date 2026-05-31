@@ -45,12 +45,16 @@ class LoginController extends Controller
 
     public function showRegister()
     {
-        if (Session::get('membre_id')) return redirect('/mon-espace');
+        // Vider la session pour permettre une nouvelle inscription
+        Session::forget(['membre_id', 'membre_nom', 'is_admin']);
         return view('register');
     }
 
     public function register(Request $request)
     {
+        // Vider l'ancienne session avant de créer le nouveau compte
+        Session::forget(['membre_id', 'membre_nom', 'is_admin']);
+
         $request->validate([
             'nom'            => 'required|string|max:255',
             'prenom'         => 'required|string|max:255',

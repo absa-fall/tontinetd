@@ -4,112 +4,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TontineTD — Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0e1a; --surface: #111827; --surface2: #1a2235; --border: #1f2d45;
-            --accent: #f0a500; --accent2: #00c2a8; --text: #e8edf5; --muted: #6b7a99;
-            --danger: #e05252; --success: #3ecf8e;
+            --green-dark: #0d3d2b; --green-mid: #1a6645; --green-bright: #3ecf8e;
+            --gold: #f0a500; --white: #ffffff; --bg: #f4f7f4;
+            --surface: #ffffff; --border: #e2ece8; --text: #1a2e22; --muted: #6b8c7a;
+            --danger: #e05252; --danger-light: #fff0f0; --success: #1a6645;
+            --success-light: #e8f5ee;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
 
-        .sidebar { width: 240px; min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 2rem 1.2rem; position: fixed; top: 0; left: 0; bottom: 0; }
-        .logo { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; margin-bottom: 0.3rem; }
-        .logo span { color: var(--accent2); }
-        .logo-sub { font-size: 0.72rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2.5rem; }
-        .nav-label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; margin-top: 1.5rem; }
-        .nav-item { display: flex; align-items: center; padding: 0.7rem 1rem; border-radius: 8px; color: var(--muted); font-size: 0.9rem; font-weight: 500; transition: all 0.2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
-        .nav-item:hover, .nav-item.active { background: var(--surface2); color: var(--text); }
-        .nav-item.active { color: var(--accent); }
-        .sidebar-footer { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--muted); text-align: center; }
-        .btn-logout { width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid rgba(224,82,82,0.3); background: rgba(224,82,82,0.1); color: var(--danger); font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-top: 1rem; }
-        .btn-logout:hover { background: var(--danger); color: #fff; }
+        .sidebar { width: 250px; min-height: 100vh; background: var(--green-dark); display: flex; flex-direction: column; padding: 2rem 1.2rem; position: fixed; top: 0; left: 0; bottom: 0; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--white); margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.6rem; }
+        .logo-icon { width: 34px; height: 34px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 700; color: var(--green-dark); flex-shrink: 0; }
+        .logo-sub { font-size: 0.72rem; color: rgba(255,255,255,0.45); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2.5rem; padding-left: 0.2rem; }
+        .nav-label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 0.6rem; margin-top: 1.5rem; padding-left: 0.5rem; }
+        .nav-item { display: flex; align-items: center; padding: 0.7rem 1rem; border-radius: 8px; color: rgba(255,255,255,0.6); font-size: 0.9rem; font-weight: 500; transition: all 0.2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; margin-bottom: 2px; }
+        .nav-item:hover { background: rgba(255,255,255,0.08); color: var(--white); }
+        .nav-item.active { background: rgba(255,255,255,0.12); color: var(--white); border-left: 3px solid var(--gold); }
+        .sidebar-footer { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.78rem; color: rgba(255,255,255,0.35); text-align: center; }
+        .btn-logout { width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-top: 0.8rem; }
+        .btn-logout:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
 
-        .main { margin-left: 240px; flex: 1; padding: 2rem 2.5rem; min-height: 100vh; }
+        .main { margin-left: 250px; flex: 1; padding: 2rem 2.5rem; min-height: 100vh; }
         .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
-        .page-title { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 700; }
-        .page-title span { color: var(--accent); }
-        .badge-date { background: var(--surface2); border: 1px solid var(--border); padding: 0.45rem 1rem; border-radius: 999px; font-size: 0.8rem; color: var(--muted); }
+        .page-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--text); }
+        .page-title span { color: var(--green-mid); }
+        .badge-date { background: var(--surface); border: 1px solid var(--border); padding: 0.45rem 1rem; border-radius: 999px; font-size: 0.8rem; color: var(--muted); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
 
+        /* STATS — tous plain comme Tours */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.5rem; transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-2px); }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem 1.5rem; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: relative; overflow: hidden; }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--border); }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(13,61,43,0.08); }
         .stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
-        .stat-value { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 700; }
-        .stat-card.accent .stat-value { color: var(--accent); }
-        .stat-card.teal .stat-value { color: var(--accent2); }
-        .stat-card.green .stat-value { color: var(--success); }
+        .stat-value { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: var(--text); }
 
         .section { display: none; }
         .section.active { display: block; }
 
-        .alert-success { background: rgba(62,207,142,0.1); border: 1px solid rgba(62,207,142,0.3); color: var(--success); padding: 0.8rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        .alert-success { background: var(--success-light); border: 1px solid rgba(26,102,69,0.2); color: var(--success); padding: 0.8rem 1.2rem; border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.9rem; }
 
-        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; }
-        .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); }
-        .panel-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); background: #fafcfa; }
+        .panel-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--text); }
         .panel-body { padding: 1.5rem; }
 
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
         .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
-        .form-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-        .form-control { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; width: 100%; }
-        .form-control:focus { border-color: var(--accent); }
-        .form-control option { background: var(--surface2); }
+        .form-label { font-size: 0.75rem; font-weight: 600; color: var(--text); text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-control { background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; width: 100%; }
+        .form-control:focus { border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(26,102,69,0.08); }
+        .form-control option { background: var(--white); }
 
-        .btn { padding: 0.65rem 1.5rem; border-radius: 8px; border: none; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
-        .btn-primary { background: var(--accent); color: #0a0e1a; }
-        .btn-primary:hover { background: #ffc034; transform: translateY(-1px); }
-        .btn-danger { background: rgba(224,82,82,0.15); color: var(--danger); border: 1px solid rgba(224,82,82,0.3); padding: 0.35rem 0.8rem; font-size: 0.78rem; }
+        .btn { padding: 0.6rem 1.4rem; border-radius: 8px; border: none; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+        .btn-primary { background: var(--green-dark); color: var(--white); }
+        .btn-primary:hover { background: var(--green-mid); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,61,43,0.2); }
+        .btn-danger { background: var(--danger-light); color: var(--danger); border: 1px solid rgba(224,82,82,0.2); padding: 0.35rem 0.8rem; font-size: 0.78rem; }
         .btn-danger:hover { background: var(--danger); color: #fff; }
-        .btn-edit { background: rgba(240,165,0,0.15); color: var(--accent); border: 1px solid rgba(240,165,0,0.3); padding: 0.35rem 0.8rem; font-size: 0.78rem; }
-        .btn-edit:hover { background: var(--accent); color: #0a0e1a; }
-        .btn-profil { background: rgba(0,194,168,0.15); color: var(--accent2); border: 1px solid rgba(0,194,168,0.3); padding: 0.35rem 0.8rem; font-size: 0.78rem; }
-        .btn-profil:hover { background: var(--accent2); color: #0a0e1a; }
-        .btn-secondary { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
-        .btn-secondary:hover { color: var(--text); }
+        .btn-edit { background: rgba(240,165,0,0.1); color: #b07800; border: 1px solid rgba(240,165,0,0.3); padding: 0.35rem 0.8rem; font-size: 0.78rem; }
+        .btn-edit:hover { background: var(--gold); color: var(--green-dark); }
+        .btn-profil { background: var(--success-light); color: var(--green-mid); border: 1px solid rgba(26,102,69,0.2); padding: 0.35rem 0.8rem; font-size: 0.78rem; }
+        .btn-profil:hover { background: var(--green-mid); color: #fff; }
+        .btn-secondary { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+        .btn-secondary:hover { color: var(--text); border-color: var(--green-mid); }
         .btn-row { display: flex; justify-content: flex-end; margin-top: 1rem; }
 
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-        thead tr { border-bottom: 1px solid var(--border); }
-        th { padding: 0.8rem 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 500; }
+        thead tr { border-bottom: 2px solid var(--border); background: #fafcfa; }
+        th { padding: 0.8rem 1rem; text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 600; }
         td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); }
         tbody tr:last-child td { border-bottom: none; }
-        tbody tr:hover td { background: var(--surface2); }
-        .actions { display: flex; gap: 0.5rem; align-items: center; }
+        tbody tr:hover td { background: #f0f7f3; }
+        .actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 
         .badge { display: inline-block; padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
-        .badge-green { background: rgba(62,207,142,0.15); color: var(--success); }
-        .badge-yellow { background: rgba(240,165,0,0.15); color: var(--accent); }
+        .badge-green { background: var(--success-light); color: var(--green-mid); }
+        .badge-yellow { background: rgba(240,165,0,0.12); color: #b07800; }
 
         .quick-links { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
-        .quick-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.2s; text-align: center; }
-        .quick-card:hover { border-color: var(--accent); transform: translateY(-3px); }
-        .quick-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.3rem; }
+        .quick-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 1.8rem; cursor: pointer; transition: all 0.2s; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .quick-card:hover { border-color: var(--green-mid); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(13,61,43,0.1); }
+        .quick-title { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1rem; margin-bottom: 0.3rem; color: var(--text); }
         .quick-desc { font-size: 0.78rem; color: var(--muted); }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(13,61,43,0.4); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
         .modal-overlay.open { display: flex; }
-        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 90%; max-width: 580px; }
-        .modal-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--accent); }
+        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 90%; max-width: 580px; box-shadow: 0 20px 60px rgba(13,61,43,0.15); }
+        .modal-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--green-dark); }
         .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; }
     </style>
 </head>
 <body>
 
 <aside class="sidebar">
-    <div class="logo">Tontine<span>TD</span></div>
-    <div class="logo-sub">Gestion de tontine</div>
+    <div class="logo"><div class="logo-icon">T</div>TontineTD</div>
+    <div class="logo-sub">Administration</div>
     <div class="nav-label">Navigation</div>
-    <button class="nav-item {{ session('section') === 'home' || !session('section') ? 'active' : '' }}" onclick="showSection('home', this)">Accueil</button>
+    <button class="nav-item {{ !session('section') || session('section') === 'home' ? 'active' : '' }}" onclick="showSection('home', this)">Accueil</button>
     <button class="nav-item {{ session('section') === 'membres' ? 'active' : '' }}" onclick="showSection('membres', this)">Membres</button>
     <button class="nav-item {{ session('section') === 'tontines' ? 'active' : '' }}" onclick="showSection('tontines', this)">Tontines</button>
     <button class="nav-item {{ session('section') === 'cotisations' ? 'active' : '' }}" onclick="showSection('cotisations', this)">Cotisations</button>
     <button class="nav-item {{ session('section') === 'tours' ? 'active' : '' }}" onclick="showSection('tours', this)">Tours</button>
     <div class="sidebar-footer">
-        TontineTD v1.0<br>Laravel 12
+        TontineTD v1.0 — Laravel 12
         <form action="/logout" method="post">
             @csrf
             <button type="submit" class="btn-logout">Se déconnecter</button>
@@ -127,10 +128,11 @@
     <div class="alert-success">{{ session('success') }}</div>
     @endif
 
+    <!-- STATS — tous plain -->
     <div class="stats-grid">
-        <div class="stat-card accent"><div class="stat-label">Membres</div><div class="stat-value">{{ count($membres) }}</div></div>
-        <div class="stat-card teal"><div class="stat-label">Tontines</div><div class="stat-value">{{ count($tontines) }}</div></div>
-        <div class="stat-card green"><div class="stat-label">Cotisations</div><div class="stat-value">{{ count($cotisations) }}</div></div>
+        <div class="stat-card"><div class="stat-label">Membres</div><div class="stat-value">{{ count($membres) }}</div></div>
+        <div class="stat-card"><div class="stat-label">Tontines</div><div class="stat-value">{{ count($tontines) }}</div></div>
+        <div class="stat-card"><div class="stat-label">Cotisations</div><div class="stat-value">{{ count($cotisations) }}</div></div>
         <div class="stat-card"><div class="stat-label">Tours</div><div class="stat-value">{{ count($tours) }}</div></div>
     </div>
 
@@ -167,29 +169,18 @@
             <div class="panel-header"><div class="panel-title">Liste des membres</div></div>
             <div class="table-wrap">
                 <table>
-                    <thead>
-                        <tr><th>ID</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Adresse</th><th>Naissance</th><th>Actions</th></tr>
-                    </thead>
+                    <thead><tr><th>ID</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Adresse</th><th>Naissance</th><th>Actions</th></tr></thead>
                     <tbody>
                         @foreach($membres as $m)
                         <tr>
-                            <td>#{{ $m->id }}</td>
-                            <td>{{ $m->nom }}</td>
-                            <td>{{ $m->prenom }}</td>
-                            <td>{{ $m->email }}</td>
-                            <td>{{ $m->telephone }}</td>
-                            <td>{{ $m->adresse }}</td>
+                            <td>#{{ $m->id }}</td><td>{{ $m->nom }}</td><td>{{ $m->prenom }}</td>
+                            <td>{{ $m->email }}</td><td>{{ $m->telephone }}</td><td>{{ $m->adresse }}</td>
                             <td>{{ $m->date_naissance }}</td>
-                            <td>
-                                <div class="actions">
-                                    <a href="/admin/membre/{{ $m->id }}" class="btn btn-profil">Voir profil</a>
-                                    <button class="btn btn-edit" onclick="openEditMembre({{ $m->id }},'{{ addslashes($m->nom) }}','{{ addslashes($m->prenom) }}','{{ $m->email }}','{{ $m->telephone }}','{{ addslashes($m->adresse) }}','{{ $m->date_naissance }}')">Modifier</button>
-                                    <form action="/membre/{{ $m->id }}" method="post" onsubmit="return confirm('Supprimer ce membre ?')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Supprimer</button>
-                                    </form>
-                                </div>
-                            </td>
+                            <td><div class="actions">
+                                <a href="/admin/membre/{{ $m->id }}" class="btn btn-profil">Voir profil</a>
+                                <button class="btn btn-edit" onclick="openEditMembre({{ $m->id }},'{{ addslashes($m->nom) }}','{{ addslashes($m->prenom) }}','{{ $m->email }}','{{ $m->telephone }}','{{ addslashes($m->adresse) }}','{{ $m->date_naissance }}')">Modifier</button>
+                                <form action="/membre/{{ $m->id }}" method="post" onsubmit="return confirm('Supprimer ce membre ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
+                            </div></td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -442,7 +433,6 @@
         tours: 'Gestion des <span>tours</span>',
     };
 
-    // Mettre le bon titre selon la section active au chargement
     const activeSection = document.querySelector('.section.active');
     if (activeSection) {
         const name = activeSection.id.replace('section-', '');

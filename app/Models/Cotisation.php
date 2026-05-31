@@ -12,6 +12,7 @@ class Cotisation extends Model
         'date_cotisation',
         'membre_id',
         'ajout_par',
+        'moyen_paiement',
     ];
 
     public function membre()

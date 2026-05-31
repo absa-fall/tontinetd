@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Membre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 
 class ControlleurMembre extends Controller
 {
@@ -16,6 +17,7 @@ class ControlleurMembre extends Controller
 
     public function show($id)
     {
+        if (!Session::get('is_admin')) return redirect('/login');
         $membre = Membre::with(['cotisations', 'notifications'])->findOrFail($id);
         return view('membre-detail', compact('membre'));
     }
