@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
 {
+    // -----------------------------------------------
+    // ESPACE MEMBRE
+    // -----------------------------------------------
     public function showLogin()
     {
         if (Session::get('is_admin')) return redirect('/dashboard');
@@ -23,13 +26,6 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
-        // ADMIN
-        if ($request->email === 'admin@tontinetd.sn' && $request->password === 'TontineTD@2026') {
-            Session::put('is_admin', true);
-            return redirect('/dashboard');
-        }
-
-        // MEMBRE
         $membre = Membre::where('email', $request->email)->first();
 
         if (!$membre || !Hash::check($request->password, $membre->password)) {
@@ -43,16 +39,42 @@ class LoginController extends Controller
         return redirect('/mon-espace');
     }
 
+    // -----------------------------------------------
+    // ESPACE ADMIN
+    // -----------------------------------------------
+    public function showAdminLogin()
+    {
+        if (Session::get('is_admin')) return redirect('/dashboard');
+        return view('admin-login');
+    }
+
+    public function adminLogin(Request $request)
+    {
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if ($request->email === 'admin@tontinetd.sn' && $request->password === 'TontineTD@2026') {
+            Session::forget(['membre_id', 'membre_nom']);
+            Session::put('is_admin', true);
+            return redirect('/dashboard');
+        }
+
+        return back()->withErrors(['email' => 'Identifiants administrateur incorrects.']);
+    }
+
+    // -----------------------------------------------
+    // INSCRIPTION
+    // -----------------------------------------------
     public function showRegister()
     {
-        // Vider la session pour permettre une nouvelle inscription
         Session::forget(['membre_id', 'membre_nom', 'is_admin']);
         return view('register');
     }
 
     public function register(Request $request)
     {
-        // Vider l'ancienne session avant de créer le nouveau compte
         Session::forget(['membre_id', 'membre_nom', 'is_admin']);
 
         $request->validate([
@@ -82,12 +104,18 @@ class LoginController extends Controller
         return redirect('/mon-espace')->with('success', 'Compte créé avec succès !');
     }
 
+    // -----------------------------------------------
+    // DÉCONNEXION
+    // -----------------------------------------------
     public function logout()
     {
         Session::forget(['membre_id', 'membre_nom', 'is_admin']);
-        return redirect('/login');
+        return redirect('/');
     }
 
+    // -----------------------------------------------
+    // CHANGER MOT DE PASSE
+    // -----------------------------------------------
     public function changerMotDePasse(Request $request)
     {
         $membre = Membre::find(Session::get('membre_id'));

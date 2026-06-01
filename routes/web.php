@@ -18,14 +18,14 @@ Route::get('/', function () {
 });
 
 // -----------------------------------------------
-// DASHBOARD ADMIN (protégé)
+// DASHBOARD ADMIN
 // -----------------------------------------------
 Route::get('/admin', function () {
-    return redirect('/dashboard');
+    return redirect('/admin/login');
 });
 
 Route::get('/dashboard', function () {
-    if (!Session::get('is_admin')) return redirect('/login');
+    if (!Session::get('is_admin')) return redirect('/admin/login');
     $membres     = \App\Models\Membre::all();
     $tontines    = \App\Models\Tontine::all();
     $cotisations = \App\Models\Cotisation::all();
@@ -66,13 +66,23 @@ Route::put('/tour/{id}', [ControlleurTour::class, 'update']);
 Route::delete('/tour/{id}', [ControlleurTour::class, 'destroy']);
 
 // -----------------------------------------------
-// LOGIN / LOGOUT
+// LOGIN MEMBRE
 // -----------------------------------------------
 Route::get('/login', [LoginController::class, 'showLogin']);
 Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout']);
+
+// -----------------------------------------------
+// LOGIN ADMIN
+// -----------------------------------------------
+Route::get('/admin/login', [LoginController::class, 'showAdminLogin']);
+Route::post('/admin/login', [LoginController::class, 'adminLogin']);
+
+// -----------------------------------------------
+// INSCRIPTION & MOT DE PASSE
+// -----------------------------------------------
 Route::get('/register', [LoginController::class, 'showRegister']);
 Route::post('/register', [LoginController::class, 'register']);
+Route::post('/logout', [LoginController::class, 'logout']);
 Route::post('/changer-password', [LoginController::class, 'changerMotDePasse']);
 
 // -----------------------------------------------

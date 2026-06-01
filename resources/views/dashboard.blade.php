@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TontineTD — Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         :root {
             --green-dark: #0d3d2b; --green-mid: #1a6645; --green-bright: #3ecf8e;
@@ -34,7 +35,6 @@
         .page-title span { color: var(--green-mid); }
         .badge-date { background: var(--surface); border: 1px solid var(--border); padding: 0.45rem 1rem; border-radius: 999px; font-size: 0.8rem; color: var(--muted); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
 
-        /* STATS — tous plain comme Tours */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
         .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem 1.5rem; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: relative; overflow: hidden; }
         .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--border); }
@@ -85,6 +85,12 @@
         .badge-green { background: var(--success-light); color: var(--green-mid); }
         .badge-yellow { background: rgba(240,165,0,0.12); color: #b07800; }
 
+        /* GRAPHES */
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .chart-full { margin-bottom: 1.5rem; }
+        .chart-container { position: relative; height: 280px; padding: 1rem; }
+        .chart-container-sm { position: relative; height: 240px; padding: 1rem; }
+
         .quick-links { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
         .quick-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 1.8rem; cursor: pointer; transition: all 0.2s; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
         .quick-card:hover { border-color: var(--green-mid); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(13,61,43,0.1); }
@@ -128,7 +134,6 @@
     <div class="alert-success">{{ session('success') }}</div>
     @endif
 
-    <!-- STATS — tous plain -->
     <div class="stats-grid">
         <div class="stat-card"><div class="stat-label">Membres</div><div class="stat-value">{{ count($membres) }}</div></div>
         <div class="stat-card"><div class="stat-label">Tontines</div><div class="stat-value">{{ count($tontines) }}</div></div>
@@ -138,6 +143,31 @@
 
     <!-- HOME -->
     <div class="section {{ !session('section') || session('section') === 'home' ? 'active' : '' }}" id="section-home">
+
+        <!-- GRAPHE 1 : Évolution du total collecté (ligne) -->
+        <div class="chart-full panel">
+            <div class="panel-header"><div class="panel-title">Évolution du total collecté par mois</div></div>
+            <div class="chart-container">
+                <canvas id="chartLigne"></canvas>
+            </div>
+        </div>
+
+        <!-- GRAPHE 2 + 3 côte à côte -->
+        <div class="charts-grid">
+            <div class="panel">
+                <div class="panel-header"><div class="panel-title">Cotisations par mois</div></div>
+                <div class="chart-container-sm">
+                    <canvas id="chartBarres"></canvas>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><div class="panel-title">Membres les plus actifs</div></div>
+                <div class="chart-container-sm">
+                    <canvas id="chartCamembert"></canvas>
+                </div>
+            </div>
+        </div>
+
         <div class="quick-links">
             <div class="quick-card" onclick="showSection('membres', document.querySelector('[onclick*=membres]'))"><div class="quick-title">Membres</div><div class="quick-desc">Gérer les membres</div></div>
             <div class="quick-card" onclick="showSection('tontines', document.querySelector('[onclick*=tontines]'))"><div class="quick-title">Tontines</div><div class="quick-desc">Gérer les tontines</div></div>
@@ -328,7 +358,7 @@
     </div>
 </main>
 
-<!-- MODAL MODIFIER MEMBRE -->
+<!-- MODALS -->
 <div class="modal-overlay" id="modalMembre">
     <div class="modal">
         <div class="modal-title">Modifier le membre</div>
@@ -349,7 +379,6 @@
     </div>
 </div>
 
-<!-- MODAL MODIFIER TONTINE -->
 <div class="modal-overlay" id="modalTontine">
     <div class="modal">
         <div class="modal-title">Modifier la tontine</div>
@@ -376,7 +405,6 @@
     </div>
 </div>
 
-<!-- MODAL MODIFIER COTISATION -->
 <div class="modal-overlay" id="modalCotisation">
     <div class="modal">
         <div class="modal-title">Modifier la cotisation</div>
@@ -400,7 +428,6 @@
     </div>
 </div>
 
-<!-- MODAL MODIFIER TOUR -->
 <div class="modal-overlay" id="modalTour">
     <div class="modal">
         <div class="modal-title">Modifier le tour</div>
@@ -488,6 +515,111 @@
 
     document.querySelectorAll('.modal-overlay').forEach(o => {
         o.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+    });
+
+    // ==================== GRAPHES ====================
+
+    // Données depuis Laravel
+    const cotisations = @json($cotisations);
+    const membres = @json($membres);
+
+    const moisLabels = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+
+    // Grouper cotisations par mois
+    const cotisParMois = Array(12).fill(0);
+    const totalParMois = Array(12).fill(0);
+    cotisations.forEach(c => {
+        const mois = new Date(c.date_cotisation).getMonth();
+        cotisParMois[mois]++;
+        totalParMois[mois] += parseFloat(c.montant);
+    });
+
+    // Cumul pour le graphe ligne
+    const cumulParMois = [];
+    let cumul = 0;
+    totalParMois.forEach(v => { cumul += v; cumulParMois.push(cumul); });
+
+    // Membres les plus actifs
+    const cotisParMembre = {};
+    cotisations.forEach(c => {
+        const m = membres.find(mb => mb.id === c.membre_id);
+        const nom = m ? m.nom + ' ' + m.prenom : 'Inconnu';
+        cotisParMembre[nom] = (cotisParMembre[nom] || 0) + 1;
+    });
+    const topMembres = Object.entries(cotisParMembre).sort((a,b) => b[1]-a[1]).slice(0,6);
+    const couleursDonut = ['#0d3d2b','#1a6645','#2d9e68','#3ecf8e','#f0a500','#ffd166'];
+
+    // GRAPHE LIGNE — Évolution total collecté
+    new Chart(document.getElementById('chartLigne'), {
+        type: 'line',
+        data: {
+            labels: moisLabels,
+            datasets: [{
+                label: 'Total collecté (F CFA)',
+                data: cumulParMois,
+                borderColor: '#1a6645',
+                backgroundColor: 'rgba(26,102,69,0.08)',
+                borderWidth: 2.5,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#1a6645',
+                pointRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { color: '#e2ece8' }, ticks: { color: '#6b8c7a', font: { size: 11 } } },
+                y: { grid: { color: '#e2ece8' }, ticks: { color: '#6b8c7a', font: { size: 11 }, callback: v => v.toLocaleString('fr') + ' F' } }
+            }
+        }
+    });
+
+    // GRAPHE BARRES — Cotisations par mois
+    new Chart(document.getElementById('chartBarres'), {
+        type: 'bar',
+        data: {
+            labels: moisLabels,
+            datasets: [{
+                label: 'Nombre de cotisations',
+                data: cotisParMois,
+                backgroundColor: 'rgba(26,102,69,0.75)',
+                borderRadius: 6,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#6b8c7a', font: { size: 10 } } },
+                y: { grid: { color: '#e2ece8' }, ticks: { color: '#6b8c7a', font: { size: 10 }, stepSize: 1 } }
+            }
+        }
+    });
+
+    // GRAPHE CAMEMBERT — Membres les plus actifs
+    new Chart(document.getElementById('chartCamembert'), {
+        type: 'doughnut',
+        data: {
+            labels: topMembres.map(m => m[0]),
+            datasets: [{
+                data: topMembres.map(m => m[1]),
+                backgroundColor: couleursDonut,
+                borderWidth: 2,
+                borderColor: '#ffffff',
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { font: { size: 10 }, color: '#1a2e22', padding: 8, boxWidth: 12 }
+                }
+            }
+        }
     });
 </script>
 </body>
