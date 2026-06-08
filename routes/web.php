@@ -21,11 +21,11 @@ Route::get('/', function () {
 // DASHBOARD ADMIN
 // -----------------------------------------------
 Route::get('/admin', function () {
-    return redirect('/admin/login');
+    return redirect('/login');
 });
 
 Route::get('/dashboard', function () {
-    if (!Session::get('is_admin')) return redirect('/admin/login');
+    if (!Session::get('is_admin')) return redirect('/login');
     $membres     = \App\Models\Membre::all();
     $tontines    = \App\Models\Tontine::all();
     $cotisations = \App\Models\Cotisation::all();
@@ -66,16 +66,10 @@ Route::put('/tour/{id}', [ControlleurTour::class, 'update']);
 Route::delete('/tour/{id}', [ControlleurTour::class, 'destroy']);
 
 // -----------------------------------------------
-// LOGIN MEMBRE
+// LOGIN UNIQUE (MEMBRE + ADMIN)
 // -----------------------------------------------
 Route::get('/login', [LoginController::class, 'showLogin']);
 Route::post('/login', [LoginController::class, 'login']);
-
-// -----------------------------------------------
-// LOGIN ADMIN
-// -----------------------------------------------
-Route::get('/admin/login', [LoginController::class, 'showAdminLogin']);
-Route::post('/admin/login', [LoginController::class, 'adminLogin']);
 
 // -----------------------------------------------
 // INSCRIPTION & MOT DE PASSE

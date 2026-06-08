@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Session;
 class LoginController extends Controller
 {
     // -----------------------------------------------
-    // ESPACE MEMBRE
+    // AFFICHER LOGIN
     // -----------------------------------------------
     public function showLogin()
     {
@@ -19,6 +19,9 @@ class LoginController extends Controller
         return view('login');
     }
 
+    // -----------------------------------------------
+    // LOGIN UNIFIÉ (ADMIN + MEMBRE)
+    // -----------------------------------------------
     public function login(Request $request)
     {
         $request->validate([
@@ -26,6 +29,14 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
+        // Vérifier si c'est l'admin
+        if ($request->email === 'admin@tontinetd.sn' && $request->password === 'TontineTD@2026') {
+            Session::forget(['membre_id', 'membre_nom']);
+            Session::put('is_admin', true);
+            return redirect('/dashboard');
+        }
+
+        // Sinon vérifier membre
         $membre = Membre::where('email', $request->email)->first();
 
         if (!$membre || !Hash::check($request->password, $membre->password)) {
@@ -37,31 +48,6 @@ class LoginController extends Controller
         Session::put('is_admin', false);
 
         return redirect('/mon-espace');
-    }
-
-    // -----------------------------------------------
-    // ESPACE ADMIN
-    // -----------------------------------------------
-    public function showAdminLogin()
-    {
-        if (Session::get('is_admin')) return redirect('/dashboard');
-        return view('admin-login');
-    }
-
-    public function adminLogin(Request $request)
-    {
-        $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required',
-        ]);
-
-        if ($request->email === 'admin@tontinetd.sn' && $request->password === 'TontineTD@2026') {
-            Session::forget(['membre_id', 'membre_nom']);
-            Session::put('is_admin', true);
-            return redirect('/dashboard');
-        }
-
-        return back()->withErrors(['email' => 'Identifiants administrateur incorrects.']);
     }
 
     // -----------------------------------------------
