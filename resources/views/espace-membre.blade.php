@@ -40,11 +40,10 @@
         .page-title span { color: var(--green-mid); }
         .badge-date { background: var(--surface); border: 1px solid var(--border); padding: 0.45rem 1rem; border-radius: 999px; font-size: 0.8rem; color: var(--muted); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
 
-        /* STATS — tous neutres */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: relative; overflow: hidden; transition: all 0.2s; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: relative; overflow: hidden; transition: all 0.2s; cursor: pointer; }
         .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--border); }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(13,61,43,0.08); }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(13,61,43,0.08); border-color: var(--green-mid); }
         .stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
         .stat-value { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--text); }
 
@@ -80,7 +79,6 @@
         .form-control-full { background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; width: 100%; transition: border-color 0.2s; }
         .form-control-full:focus { border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(26,102,69,0.08); }
         .form-stack { display: flex; flex-direction: column; gap: 1rem; max-width: 400px; }
-        .form-stack .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
 
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
@@ -95,6 +93,7 @@
         .badge-wave { background: var(--wave-light); color: var(--wave); padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
         .badge-orange { background: var(--orange-light); color: var(--orange); padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
         .badge-success { background: var(--success-light); color: var(--success); padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+        .badge-count { background: var(--success-light); color: var(--success); border: 1px solid rgba(26,102,69,0.2); padding: 0.2rem 0.8rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
 
         .notif-item { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
         .notif-item:last-child { border-bottom: none; }
@@ -104,6 +103,22 @@
         .notif-date { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
         .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; margin-top: 6px; }
         .empty { padding: 2rem; text-align: center; color: var(--muted); font-size: 0.9rem; }
+
+        .tontine-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .tontine-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .tontine-name { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--green-dark); }
+        .tontine-info { font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem; }
+        .tontine-section { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+        .tontine-section-title { font-size: 0.8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+        .membre-tag { display: inline-flex; align-items: center; gap: 0.3rem; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 0.3rem 0.8rem; font-size: 0.8rem; margin: 0.2rem; }
+        .tour-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+        .tour-item:last-child { border-bottom: none; }
+
+        .contact-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg); border-radius: 10px; border: 1px solid var(--border); text-decoration: none; color: var(--text); transition: all 0.2s; margin-bottom: 0.8rem; }
+        .contact-item:hover { border-color: var(--green-mid); transform: translateX(4px); }
+        .contact-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+        .contact-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.2rem; }
+        .contact-value { font-weight: 600; font-size: 0.9rem; }
 
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(13,61,43,0.35); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
         .modal-overlay.open { display: flex; }
@@ -145,6 +160,7 @@
     </div>
     <div class="nav-label">Menu</div>
     <button class="nav-item active" onclick="showSection('accueil', this)">Accueil</button>
+    <button class="nav-item" onclick="showSection('tontines', this)">Mes tontines</button>
     <button class="nav-item" onclick="showSection('cotisations', this)">Mes cotisations</button>
     <button class="nav-item" onclick="showSection('notifications', this)">
         Notifications
@@ -152,6 +168,8 @@
         <span class="notif-badge">{{ $membre->notificationsNonLues()->count() }}</span>
         @endif
     </button>
+    <button class="nav-item" onclick="showSection('membres', this)">Membres</button>
+    <button class="nav-item" onclick="showSection('contact', this)">Contact admin</button>
     <button class="nav-item" onclick="showSection('securite', this)">Sécurité</button>
     <div class="sidebar-footer">
         <form action="/logout" method="post">
@@ -168,15 +186,19 @@
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" onclick="showSection('tontines', document.querySelectorAll('.nav-item')[1])">
+            <div class="stat-label">Mes tontines</div>
+            <div class="stat-value">{{ $membre->tontines->count() }}</div>
+        </div>
+        <div class="stat-card" onclick="showSection('cotisations', document.querySelectorAll('.nav-item')[2])">
             <div class="stat-label">Mes cotisations</div>
             <div class="stat-value">{{ $membre->cotisations->count() }}</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" onclick="showSection('cotisations', document.querySelectorAll('.nav-item')[2])">
             <div class="stat-label">Total cotisé</div>
             <div class="stat-value">{{ number_format($membre->cotisations->sum('montant'), 0, ',', ' ') }} F</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" onclick="showSection('notifications', document.querySelectorAll('.nav-item')[3])">
             <div class="stat-label">Notifications</div>
             <div class="stat-value">{{ $membre->notificationsNonLues()->count() }}</div>
         </div>
@@ -196,6 +218,68 @@
         </div>
     </div>
 
+    <!-- MES TONTINES -->
+    <div class="section" id="section-tontines">
+        @if($membre->tontines->count() > 0)
+            @foreach($membre->tontines as $tontine)
+            <div class="tontine-card">
+                <div class="tontine-header">
+                    <div class="tontine-name">{{ $tontine->nom }}</div>
+                    @if($tontine->pivot->role === 'admin')
+                        <span class="badge-admin">Admin</span>
+                    @else
+                        <span class="badge-membre">Membre</span>
+                    @endif
+                </div>
+                <div class="tontine-info">
+                    <strong>Montant :</strong> {{ number_format($tontine->montant, 0, ',', ' ') }} F |
+                    <strong>Fréquence :</strong> {{ $tontine->frequence }} |
+                    <strong>Du</strong> {{ \Carbon\Carbon::parse($tontine->date_debut)->format('d/m/Y') }}
+                    <strong>au</strong> {{ \Carbon\Carbon::parse($tontine->date_fin)->format('d/m/Y') }}
+                </div>
+                <div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 0.5rem;">
+                    {{ $tontine->description }}
+                </div>
+                <div class="tontine-section">
+                    <div class="tontine-section-title">Tours ({{ $tontine->tours->count() }})</div>
+                    @if($tontine->tours->count() > 0)
+                        @foreach($tontine->tours as $tour)
+                        <div class="tour-item">
+                            <span>Tour du {{ \Carbon\Carbon::parse($tour->date_tour)->format('d/m/Y') }}</span>
+                            @if($tour->etat === 'termine')
+                                <span class="badge-success">Terminé</span>
+                            @else
+                                <span class="badge-wave">En attente</span>
+                            @endif
+                        </div>
+                        @endforeach
+                    @else
+                        <div style="font-size: 0.85rem; color: var(--muted);">Aucun tour pour le moment.</div>
+                    @endif
+                </div>
+                <div class="tontine-section">
+                    <div class="tontine-section-title">Membres ({{ $tontine->membres->count() }})</div>
+                    <div>
+                        @foreach($tontine->membres as $m)
+                        <span class="membre-tag">
+                            {{ $m->prenom }} {{ $m->nom }}
+                            @if($m->pivot->role === 'admin')
+                                <span style="color: var(--green-mid); font-size: 0.7rem;">(Admin)</span>
+                            @endif
+                        </span>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        @else
+            <div class="panel">
+                <div class="panel-header"><div class="panel-title">Mes tontines</div></div>
+                <div class="empty">Vous n'appartenez à aucune tontine pour le moment.</div>
+            </div>
+        @endif
+    </div>
+
     <!-- COTISATIONS -->
     <div class="section" id="section-cotisations">
         @if(session('success'))
@@ -205,6 +289,15 @@
             <div class="panel-header"><div class="panel-title">Ajouter une cotisation</div></div>
             <div class="panel-body">
                 <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Tontine</label>
+                        <select id="cotis_tontine" class="form-control">
+                            <option value="">Choisir une tontine</option>
+                            @foreach($membre->tontines as $t)
+                            <option value="{{ $t->id }}">{{ $t->nom }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label class="form-label">Montant (F CFA)</label>
                         <input type="number" id="cotis_montant" class="form-control" placeholder="Ex: 5000" min="100">
@@ -228,11 +321,12 @@
             <div class="table-wrap">
                 @if($membre->cotisations->count() > 0)
                 <table>
-                    <thead><tr><th>ID</th><th>Montant</th><th>Date</th><th>Moyen</th><th>Ajouté par</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Tontine</th><th>Montant</th><th>Date</th><th>Moyen</th><th>Ajouté par</th></tr></thead>
                     <tbody>
                         @foreach($membre->cotisations as $c)
                         <tr>
                             <td>#{{ $c->id }}</td>
+                            <td>{{ $c->tontine->nom ?? '-' }}</td>
                             <td>{{ number_format($c->montant, 0, ',', ' ') }} F CFA</td>
                             <td>{{ \Carbon\Carbon::parse($c->date_cotisation)->format('d/m/Y') }}</td>
                             <td>
@@ -288,6 +382,84 @@
             @else
             <div class="empty">Aucune notification pour le moment.</div>
             @endif
+        </div>
+    </div>
+
+    <!-- MEMBRES -->
+    <div class="section" id="section-membres">
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">Membres de TontineTD</div>
+                <span class="badge-count">{{ $membres->count() }} membre(s)</span>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($membres as $m)
+                        <tr>
+                            <td>#{{ $m->id }}</td>
+                            <td>{{ $m->nom }}</td>
+                            <td>{{ $m->prenom }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTACT ADMIN -->
+    <div class="section" id="section-contact">
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">Contacter l'administrateur</div>
+            </div>
+            <div class="panel-body">
+                @if($admin)
+                <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border);margin-bottom:1.2rem;">
+                    <div style="width:50px;height:50px;border-radius:50%;background:var(--success-light);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--green-mid);font-size:1.3rem;flex-shrink:0;">
+                        {{ strtoupper(substr($admin->nom, 0, 1)) }}
+                    </div>
+                    <div>
+                        <div style="font-weight:700;font-size:1rem;">{{ $admin->nom }} {{ $admin->prenom }}</div>
+                        <div style="font-size:0.78rem;color:var(--muted);">Administrateur TontineTD</div>
+                    </div>
+                </div>
+
+                <a href="mailto:{{ $admin->email }}" class="contact-item">
+                    <div class="contact-icon" style="background:var(--success-light);color:var(--green-mid);">✉</div>
+                    <div>
+                        <div class="contact-label">Email</div>
+                        <div class="contact-value">{{ $admin->email }}</div>
+                    </div>
+                </a>
+
+                <a href="tel:{{ $admin->telephone }}" class="contact-item">
+                    <div class="contact-icon" style="background:var(--wave-light);color:var(--wave);">📞</div>
+                    <div>
+                        <div class="contact-label">Téléphone</div>
+                        <div class="contact-value">{{ $admin->telephone }}</div>
+                    </div>
+                </a>
+
+                <a href="https://wa.me/{{ preg_replace('/\s+/', '', $admin->telephone) }}" target="_blank" class="contact-item">
+                    <div class="contact-icon" style="background:#e8fdf2;color:#25d366;">💬</div>
+                    <div>
+                        <div class="contact-label">WhatsApp</div>
+                        <div class="contact-value">{{ $admin->telephone }}</div>
+                    </div>
+                </a>
+                @else
+                <div class="empty">Aucun administrateur trouvé.</div>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -378,8 +550,11 @@
 
     const titles = {
         accueil: 'Mon <span>espace</span>',
+        tontines: 'Mes <span>tontines</span>',
         cotisations: 'Mes <span>cotisations</span>',
         notifications: 'Mes <span>notifications</span>',
+        membres: 'Les <span>membres</span>',
+        contact: 'Contacter l\'<span>admin</span>',
         securite: 'Ma <span>sécurité</span>',
     };
 
@@ -392,18 +567,20 @@
     }
 
     @if($errors->has('ancien_password'))
-        showSection('securite', document.querySelectorAll('.nav-item')[3]);
+        showSection('securite', document.querySelectorAll('.nav-item')[6]);
     @endif
     @if(session('success') && request()->is('*changer*'))
-        showSection('securite', document.querySelectorAll('.nav-item')[3]);
+        showSection('securite', document.querySelectorAll('.nav-item')[6]);
     @endif
-    @if(session('success'))
-        showSection('cotisations', document.querySelectorAll('.nav-item')[1]);
+    @if(session('success') && !request()->is('*changer*'))
+        showSection('cotisations', document.querySelectorAll('.nav-item')[2]);
     @endif
 
     function ouvrirModalPaiement() {
+        const tontine = document.getElementById('cotis_tontine').value;
         const montant = document.getElementById('cotis_montant').value;
         const date = document.getElementById('cotis_date').value;
+        if (!tontine) { alert('Veuillez choisir une tontine.'); return; }
         if (!montant || montant < 100) { alert('Veuillez entrer un montant valide.'); return; }
         if (!date) { alert('Veuillez choisir une date.'); return; }
         ['wave','orange','cash'].forEach(m => {
@@ -427,32 +604,33 @@
     }
 
     function confirmerPaiement(method) {
+        const tontine = document.getElementById('cotis_tontine').value;
         const montant = document.getElementById('cotis_montant').value;
         const date = document.getElementById('cotis_date').value;
         if (method === 'wave' && !document.getElementById('pay_wave_numero').value) { alert('Veuillez entrer votre numéro Wave.'); return; }
         if (method === 'orange' && !document.getElementById('pay_orange_numero').value) { alert('Veuillez entrer votre numéro Orange Money.'); return; }
         document.getElementById('modalPaiement').classList.remove('open');
-        if (method === 'cash') { soumettreFormulaire(montant, date, method); return; }
+        if (method === 'cash') { soumettreFormulaire(tontine, montant, date, method); return; }
         const spinner = document.getElementById('spinner');
         const spinnerText = document.getElementById('spinnerText');
         spinner.classList.add('open');
         spinnerText.textContent = method === 'wave' ? 'Connexion à Wave...' : 'Connexion à Orange Money...';
         setTimeout(() => spinnerText.textContent = 'Vérification du solde...', 1000);
         setTimeout(() => spinnerText.textContent = 'Traitement du paiement...', 2000);
-        setTimeout(() => { spinner.classList.remove('open'); soumettreFormulaire(montant, date, method); }, 3000);
+        setTimeout(() => { spinner.classList.remove('open'); soumettreFormulaire(tontine, montant, date, method); }, 3000);
     }
 
-    function soumettreFormulaire(montant, date, method) {
+    function soumettreFormulaire(tontine, montant, date, method) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '/mon-espace/cotisation';
-        const fields = { '_token': '{{ csrf_token() }}', 'montant': montant, 'date_cotisation': date, 'moyen_paiement': method };
+        const fields = { '_token': '{{ csrf_token() }}', 'tontine_id': tontine, 'montant': montant, 'date_cotisation': date, 'moyen_paiement': method };
         Object.entries(fields).forEach(([name, value]) => {
             const input = document.createElement('input');
             input.type = 'hidden'; input.name = name; input.value = value;
             form.appendChild(input);
         });
-        document.body.appendChild(form);
+       document.body.appendChild(form);
         form.submit();
     }
 </script>

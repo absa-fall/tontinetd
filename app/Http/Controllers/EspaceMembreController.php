@@ -17,14 +17,26 @@ class EspaceMembreController extends Controller
     {
         $id = Session::get('membre_id');
         if (!$id) return null;
-        return Membre::with(['cotisations', 'notifications'])->find($id);
+        
+        return Membre::with([
+            'cotisations.tontine',
+            'tontines.tours',
+            'tontines.membres',
+            'notifications'
+        ])->find($id);
     }
 
     public function index()
     {
         $membre = $this->getMembre();
         if (!$membre) return redirect('/login');
-        return view('espace-membre', compact('membre'));
+        
+        $membres = Membre::all();
+       
+$admin = Membre::whereHas('tontines', function($q) {
+    $q->where('membre_tontine.role', 'admin');
+})->first();
+        return view('espace-membre', compact('membre', 'membres', 'admin'));
     }
 
     public function ajouterCotisation(Request $request)
@@ -35,12 +47,14 @@ class EspaceMembreController extends Controller
         $request->validate([
             'montant'         => 'required|numeric|min:1',
             'date_cotisation' => 'required|date',
+            'tontine_id'      => 'required|exists:tontines,id',
         ]);
 
         Cotisation::create([
             'montant'         => $request->montant,
             'date_cotisation' => $request->date_cotisation,
             'membre_id'       => $membre->id,
+            'tontine_id'      => $request->tontine_id,
             'ajout_par'       => 'membre',
             'moyen_paiement'  => $request->moyen_paiement ?? 'cash',
         ]);

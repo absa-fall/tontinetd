@@ -14,6 +14,7 @@ class Membre extends Model
         'adresse',
         'telephone',
         'date_naissance',
+        'statut',
     ];
 
     public function cotisations()
@@ -29,5 +30,17 @@ class Membre extends Model
     public function notificationsNonLues()
     {
         return $this->hasMany(NotificationMembre::class)->where('lu', false);
+    }
+
+    public function notificationsAdmin()
+    {
+        return $this->hasMany(NotificationAdmin::class);
+    }
+
+    public function tontines()
+    {
+        return $this->belongsToMany(Tontine::class, 'membre_tontine')
+                    ->withPivot('role')
+                    ->withTimestamps();
     }
 }

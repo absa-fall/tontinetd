@@ -3,23 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Membre;
+use App\Models\NotificationMembre;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Session;
 
 class ControlleurMembre extends Controller
 {
     public function index()
     {
         $membres = Membre::all();
-        return view('membre', compact('membres'));
-    }
-
-    public function show($id)
-    {
-        if (!Session::get('is_admin')) return redirect('/login');
-        $membre = Membre::with(['cotisations', 'notifications'])->findOrFail($id);
-        return view('membre-detail', compact('membre'));
+        return view('membres.index', compact('membres'));
     }
 
     public function store(Request $request)
@@ -27,67 +19,64 @@ class ControlleurMembre extends Controller
         $request->validate([
             'nom'            => 'required|string|max:255',
             'prenom'         => 'required|string|max:255',
-            'email'          => 'required|email|unique:membres,email',
+            'email'          => 'required|email|unique:membres',
             'telephone'      => 'required|string|max:20',
-            'adresse'        => 'required|string|max:255',
+            'adresse'        => 'required|string',
             'date_naissance' => 'required|date',
         ]);
 
-        $passwordParDefaut = '1234' . $request->nom;
-
-        Membre::create([
+        $nouveau = Membre::create([
             'nom'            => $request->nom,
             'prenom'         => $request->prenom,
             'email'          => $request->email,
+            'password'       => bcrypt('password123'),
             'telephone'      => $request->telephone,
             'adresse'        => $request->adresse,
-            'password'       => Hash::make($passwordParDefaut),
             'date_naissance' => $request->date_naissance,
         ]);
 
-        return redirect('/dashboard')
-            ->with('success', 'Membre ajouté ! Mot de passe par défaut : ' . $passwordParDefaut)
-            ->with('section', 'membres');
+        // Notifier tous les membres existants (sauf le nouveau)
+        $membres = Membre::where('id', '!=', $nouveau->id)->get();
+        foreach ($membres as $m) {
+            NotificationMembre::create([
+                'membre_id' => $m->id,
+                'titre'     => 'Nouveau membre',
+                'message'   => $nouveau->prenom . ' ' . $nouveau->nom . ' a rejoint TontineTD.',
+                'lu'        => false,
+            ]);
+        }
+
+        return redirect('/dashboard')->with('success', 'Membre ajouté avec succès !')->with('section', 'membres');
     }
 
     public function update(Request $request, $id)
     {
-        $membre = Membre::findOrFail($id);
-
         $request->validate([
             'nom'            => 'required|string|max:255',
             'prenom'         => 'required|string|max:255',
             'email'          => 'required|email|unique:membres,email,' . $id,
             'telephone'      => 'required|string|max:20',
-            'adresse'        => 'required|string|max:255',
+            'adresse'        => 'required|string',
             'date_naissance' => 'required|date',
         ]);
 
-        $data = [
-            'nom'            => $request->nom,
-            'prenom'         => $request->prenom,
-            'email'          => $request->email,
-            'telephone'      => $request->telephone,
-            'adresse'        => $request->adresse,
-            'date_naissance' => $request->date_naissance,
-        ];
+        $membre = Membre::findOrFail($id);
+        $membre->update($request->all());
 
-        if ($request->password) {
-            $data['password'] = Hash::make($request->password);
-        }
-
-        $membre->update($data);
-
-        return redirect('/dashboard')
-            ->with('success', 'Membre mis à jour !')
-            ->with('section', 'membres');
+        return redirect('/dashboard')->with('success', 'Membre modifié avec succès !')->with('section', 'membres');
     }
 
     public function destroy($id)
     {
-        Membre::findOrFail($id)->delete();
-        return redirect('/dashboard')
-            ->with('success', 'Membre supprimé !')
-            ->with('section', 'membres');
+        $membre = Membre::findOrFail($id);
+        $membre->delete();
+
+        return redirect('/dashboard')->with('success', 'Membre supprimé avec succès !')->with('section', 'membres');
+    }
+
+    public function show($id)
+    {
+        $membre = Membre::with(['cotisations', 'tontines', 'notifications'])->findOrFail($id);
+        return view('membres.show', compact('membre'));
     }
 }

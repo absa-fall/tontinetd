@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Membre;
+use App\Models\NotificationAdmin;
+use App\Models\NotificationMembre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
@@ -43,6 +45,15 @@ class LoginController extends Controller
             return back()->withErrors(['email' => 'Email ou mot de passe incorrect.']);
         }
 
+        // Vérifier le statut
+        if ($membre->statut === 'en_attente') {
+            return back()->withErrors(['email' => 'Votre compte est en attente de validation par l\'administrateur.']);
+        }
+
+        if ($membre->statut === 'refuse') {
+            return back()->withErrors(['email' => 'Votre compte a été refusé. Contactez l\'administrateur.']);
+        }
+
         Session::put('membre_id', $membre->id);
         Session::put('membre_nom', $membre->nom . ' ' . $membre->prenom);
         Session::put('is_admin', false);
@@ -81,13 +92,25 @@ class LoginController extends Controller
             'telephone'      => $request->telephone,
             'date_naissance' => $request->date_naissance,
             'password'       => Hash::make($request->password),
+            'statut'         => 'en_attente',
         ]);
 
-        Session::put('membre_id', $membre->id);
-        Session::put('membre_nom', $membre->nom . ' ' . $membre->prenom);
-        Session::put('is_admin', false);
+        // Notif à l'admin
+        NotificationAdmin::create([
+            'membre_id' => $membre->id,
+            'titre'     => 'Nouvelle inscription',
+            'message'   => $membre->prenom . ' ' . $membre->nom . ' vient de créer un compte et attend votre approbation.',
+        ]);
 
-        return redirect('/mon-espace')->with('success', 'Compte créé avec succès !');
+        // Notif au membre
+        NotificationMembre::create([
+            'membre_id' => $membre->id,
+            'titre'     => 'Compte en attente',
+            'message'   => 'Votre compte a été créé avec succès. En attente de validation par l\'administrateur.',
+            'lu'        => false,
+        ]);
+
+        return redirect('/login')->with('success', 'Compte créé avec succès ! En attente de validation par l\'administrateur.');
     }
 
     // -----------------------------------------------

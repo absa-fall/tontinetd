@@ -12,7 +12,8 @@
             --gold: #f0a500; --white: #ffffff; --bg: #f4f7f4;
             --surface: #ffffff; --border: #e2ece8; --text: #1a2e22; --muted: #6b8c7a;
             --danger: #e05252; --danger-light: #fff0f0; --success: #1a6645;
-            --success-light: #e8f5ee;
+            --success-light: #e8f5ee; --wave: #1ba4e0; --wave-light: #e8f5fc;
+            --orange: #ff6600; --orange-light: #fff3eb;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
@@ -22,9 +23,10 @@
         .logo-icon { width: 34px; height: 34px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 700; color: var(--green-dark); flex-shrink: 0; }
         .logo-sub { font-size: 0.72rem; color: rgba(255,255,255,0.45); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2.5rem; padding-left: 0.2rem; }
         .nav-label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 0.6rem; margin-top: 1.5rem; padding-left: 0.5rem; }
-        .nav-item { display: flex; align-items: center; padding: 0.7rem 1rem; border-radius: 8px; color: rgba(255,255,255,0.6); font-size: 0.9rem; font-weight: 500; transition: all 0.2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; margin-bottom: 2px; }
+        .nav-item { display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 1rem; border-radius: 8px; color: rgba(255,255,255,0.6); font-size: 0.9rem; font-weight: 500; transition: all 0.2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; margin-bottom: 2px; }
         .nav-item:hover { background: rgba(255,255,255,0.08); color: var(--white); }
         .nav-item.active { background: rgba(255,255,255,0.12); color: var(--white); border-left: 3px solid var(--gold); }
+        .notif-badge { background: var(--danger); color: #fff; border-radius: 999px; font-size: 0.65rem; padding: 1px 6px; font-weight: 700; }
         .sidebar-footer { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.78rem; color: rgba(255,255,255,0.35); text-align: center; }
         .btn-logout { width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-top: 0.8rem; }
         .btn-logout:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
@@ -46,6 +48,7 @@
         .section.active { display: block; }
 
         .alert-success { background: var(--success-light); border: 1px solid rgba(26,102,69,0.2); color: var(--success); padding: 0.8rem 1.2rem; border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        .alert-error { background: var(--danger-light); border: 1px solid rgba(224,82,82,0.2); color: var(--danger); padding: 0.8rem 1.2rem; border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.9rem; }
 
         .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
         .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); background: #fafcfa; }
@@ -57,11 +60,10 @@
         .form-label { font-size: 0.75rem; font-weight: 600; color: var(--text); text-transform: uppercase; letter-spacing: 0.5px; }
         .form-control { background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; width: 100%; }
         .form-control:focus { border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(26,102,69,0.08); }
-        .form-control option { background: var(--white); }
 
         .btn { padding: 0.6rem 1.4rem; border-radius: 8px; border: none; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
         .btn-primary { background: var(--green-dark); color: var(--white); }
-        .btn-primary:hover { background: var(--green-mid); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,61,43,0.2); }
+        .btn-primary:hover { background: var(--green-mid); transform: translateY(-1px); }
         .btn-danger { background: var(--danger-light); color: var(--danger); border: 1px solid rgba(224,82,82,0.2); padding: 0.35rem 0.8rem; font-size: 0.78rem; }
         .btn-danger:hover { background: var(--danger); color: #fff; }
         .btn-edit { background: rgba(240,165,0,0.1); color: #b07800; border: 1px solid rgba(240,165,0,0.3); padding: 0.35rem 0.8rem; font-size: 0.78rem; }
@@ -84,8 +86,10 @@
         .badge { display: inline-block; padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
         .badge-green { background: var(--success-light); color: var(--green-mid); }
         .badge-yellow { background: rgba(240,165,0,0.12); color: #b07800; }
+        .badge-wave { background: var(--wave-light); color: var(--wave); }
+        .badge-orange { background: var(--orange-light); color: var(--orange); }
+        .badge-danger { background: var(--danger-light); color: var(--danger); }
 
-        /* GRAPHES */
         .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
         .chart-full { margin-bottom: 1.5rem; }
         .chart-container { position: relative; height: 280px; padding: 1rem; }
@@ -102,6 +106,14 @@
         .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 90%; max-width: 580px; box-shadow: 0 20px 60px rgba(13,61,43,0.15); }
         .modal-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--green-dark); }
         .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+        .notif-item { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 1rem; }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item.non-lu { background: rgba(240,165,0,0.04); border-left: 3px solid var(--gold); }
+        .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; margin-top: 6px; }
+
+        .membre-tag { display: inline-flex; align-items: center; gap: 0.3rem; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 0.3rem 0.8rem; font-size: 0.8rem; margin: 0.2rem; }
+        .empty { padding: 2rem; text-align: center; color: var(--muted); font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -110,11 +122,17 @@
     <div class="logo"><div class="logo-icon">T</div>TontineTD</div>
     <div class="logo-sub">Administration</div>
     <div class="nav-label">Navigation</div>
-    <button class="nav-item {{ !session('section') || session('section') === 'home' ? 'active' : '' }}" onclick="showSection('home', this)">Accueil</button>
-    <button class="nav-item {{ session('section') === 'membres' ? 'active' : '' }}" onclick="showSection('membres', this)">Membres</button>
-    <button class="nav-item {{ session('section') === 'tontines' ? 'active' : '' }}" onclick="showSection('tontines', this)">Tontines</button>
-    <button class="nav-item {{ session('section') === 'cotisations' ? 'active' : '' }}" onclick="showSection('cotisations', this)">Cotisations</button>
-    <button class="nav-item {{ session('section') === 'tours' ? 'active' : '' }}" onclick="showSection('tours', this)">Tours</button>
+    <button class="nav-item active" onclick="showSection('home', this)">Accueil</button>
+    <button class="nav-item" onclick="showSection('inscriptions', this)">
+        Inscriptions
+        @if(isset($membresEnAttente) && $membresEnAttente->count() > 0)
+        <span class="notif-badge">{{ $membresEnAttente->count() }}</span>
+        @endif
+    </button>
+    <button class="nav-item" onclick="showSection('membres', this)">Membres</button>
+    <button class="nav-item" onclick="showSection('tontines', this)">Tontines</button>
+    <button class="nav-item" onclick="showSection('cotisations', this)">Cotisations</button>
+    <button class="nav-item" onclick="showSection('tours', this)">Tours</button>
     <div class="sidebar-footer">
         TontineTD v1.0 — Laravel 12
         <form action="/logout" method="post">
@@ -133,51 +151,139 @@
     @if(session('success'))
     <div class="alert-success">{{ session('success') }}</div>
     @endif
+    @if(session('error'))
+    <div class="alert-error">{{ session('error') }}</div>
+    @endif
 
     <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">Membres</div><div class="stat-value">{{ count($membres) }}</div></div>
-        <div class="stat-card"><div class="stat-label">Tontines</div><div class="stat-value">{{ count($tontines) }}</div></div>
-        <div class="stat-card"><div class="stat-label">Cotisations</div><div class="stat-value">{{ count($cotisations) }}</div></div>
-        <div class="stat-card"><div class="stat-label">Tours</div><div class="stat-value">{{ count($tours) }}</div></div>
+        <div class="stat-card" onclick="showSection('membres', document.querySelectorAll('.nav-item')[2])" style="cursor:pointer;">
+            <div class="stat-label">Membres</div>
+            <div class="stat-value">{{ count($membres) }}</div>
+        </div>
+        <div class="stat-card" onclick="showSection('tontines', document.querySelectorAll('.nav-item')[3])" style="cursor:pointer;">
+            <div class="stat-label">Tontines</div>
+            <div class="stat-value">{{ count($tontines) }}</div>
+        </div>
+        <div class="stat-card" onclick="showSection('cotisations', document.querySelectorAll('.nav-item')[4])" style="cursor:pointer;">
+            <div class="stat-label">Cotisations</div>
+            <div class="stat-value">{{ count($cotisations) }}</div>
+        </div>
+        <div class="stat-card" onclick="showSection('inscriptions', document.querySelectorAll('.nav-item')[1])" style="cursor:pointer;">
+            <div class="stat-label">En attente</div>
+            <div class="stat-value" style="{{ isset($membresEnAttente) && $membresEnAttente->count() > 0 ? 'color:var(--gold);' : '' }}">{{ isset($membresEnAttente) ? $membresEnAttente->count() : 0 }}</div>
+        </div>
+    </div>
+
+    <!-- INSCRIPTIONS EN ATTENTE -->
+    <div class="section" id="section-inscriptions">
+        @if(isset($notifsAdmin) && $notifsAdmin->count() > 0)
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">Notifications d'inscription</div>
+                <span class="badge badge-yellow">{{ $notifsAdmin->where('lu', false)->count() }} non lue(s)</span>
+            </div>
+            @foreach($notifsAdmin as $notif)
+            <div class="notif-item {{ !$notif->lu ? 'non-lu' : '' }}">
+                @if(!$notif->lu)<div class="notif-dot"></div>@endif
+                <div style="flex:1">
+                    <div style="font-weight:600;font-size:0.9rem;">{{ $notif->titre }}</div>
+                    <div style="font-size:0.82rem;color:var(--muted);">{{ $notif->message }}</div>
+                    <div style="font-size:0.72rem;color:var(--muted);margin-top:0.3rem;">{{ \Carbon\Carbon::parse($notif->created_at)->locale('fr')->diffForHumans() }}</div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @endif
+
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">Membres en attente de validation</div>
+                <span class="badge badge-yellow">{{ isset($membresEnAttente) ? $membresEnAttente->count() : 0 }} en attente</span>
+            </div>
+            <div class="table-wrap">
+                @if(isset($membresEnAttente) && $membresEnAttente->count() > 0)
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Email</th>
+                            <th>Téléphone</th>
+                            <th>Inscrit le</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($membresEnAttente as $m)
+                        <tr>
+                            <td>#{{ $m->id }}</td>
+                            <td>{{ $m->nom }}</td>
+                            <td>{{ $m->prenom }}</td>
+                            <td>{{ $m->email }}</td>
+                            <td>{{ $m->telephone }}</td>
+                            <td>{{ \Carbon\Carbon::parse($m->created_at)->format('d/m/Y à H:i') }}</td>
+                            <td>
+                                <div class="actions">
+                                    <form action="/admin/membre/{{ $m->id }}/approuver" method="post" onsubmit="return confirm('Approuver {{ $m->prenom }} {{ $m->nom }} ?')">
+                                        @csrf
+                                        <button type="submit" class="btn btn-profil">✅ Approuver</button>
+                                    </form>
+                                    <form action="/admin/membre/{{ $m->id }}/refuser" method="post" onsubmit="return confirm('Refuser {{ $m->prenom }} {{ $m->nom }} ?')">
+                                        @csrf
+                                        <button type="submit" class="btn btn-danger">❌ Refuser</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                @else
+                <div class="empty">✅ Aucune inscription en attente.</div>
+                @endif
+            </div>
+        </div>
     </div>
 
     <!-- HOME -->
-    <div class="section {{ !session('section') || session('section') === 'home' ? 'active' : '' }}" id="section-home">
-
-        <!-- GRAPHE 1 : Évolution du total collecté (ligne) -->
+    <div class="section active" id="section-home">
         <div class="chart-full panel">
             <div class="panel-header"><div class="panel-title">Évolution du total collecté par mois</div></div>
-            <div class="chart-container">
-                <canvas id="chartLigne"></canvas>
-            </div>
+            <div class="chart-container"><canvas id="chartLigne"></canvas></div>
         </div>
-
-        <!-- GRAPHE 2 + 3 côte à côte -->
         <div class="charts-grid">
             <div class="panel">
                 <div class="panel-header"><div class="panel-title">Cotisations par mois</div></div>
-                <div class="chart-container-sm">
-                    <canvas id="chartBarres"></canvas>
-                </div>
+                <div class="chart-container-sm"><canvas id="chartBarres"></canvas></div>
             </div>
             <div class="panel">
                 <div class="panel-header"><div class="panel-title">Membres les plus actifs</div></div>
-                <div class="chart-container-sm">
-                    <canvas id="chartCamembert"></canvas>
-                </div>
+                <div class="chart-container-sm"><canvas id="chartCamembert"></canvas></div>
             </div>
         </div>
-
         <div class="quick-links">
-            <div class="quick-card" onclick="showSection('membres', document.querySelector('[onclick*=membres]'))"><div class="quick-title">Membres</div><div class="quick-desc">Gérer les membres</div></div>
-            <div class="quick-card" onclick="showSection('tontines', document.querySelector('[onclick*=tontines]'))"><div class="quick-title">Tontines</div><div class="quick-desc">Gérer les tontines</div></div>
-            <div class="quick-card" onclick="showSection('cotisations', document.querySelector('[onclick*=cotisations]'))"><div class="quick-title">Cotisations</div><div class="quick-desc">Gérer les cotisations</div></div>
-            <div class="quick-card" onclick="showSection('tours', document.querySelector('[onclick*=tours]'))"><div class="quick-title">Tours</div><div class="quick-desc">Gérer les tours</div></div>
+            <div class="quick-card" onclick="goToSection('inscriptions')">
+                <div class="quick-title">Inscriptions</div>
+                <div class="quick-desc">{{ isset($membresEnAttente) ? $membresEnAttente->count() : 0 }} en attente</div>
+            </div>
+            <div class="quick-card" onclick="goToSection('membres')">
+                <div class="quick-title">Membres</div>
+                <div class="quick-desc">Gérer les membres</div>
+            </div>
+            <div class="quick-card" onclick="goToSection('tontines')">
+                <div class="quick-title">Tontines</div>
+                <div class="quick-desc">Gérer les tontines</div>
+            </div>
+            <div class="quick-card" onclick="goToSection('cotisations')">
+                <div class="quick-title">Cotisations</div>
+                <div class="quick-desc">Gérer les cotisations</div>
+            </div>
         </div>
     </div>
 
     <!-- MEMBRES -->
-    <div class="section {{ session('section') === 'membres' ? 'active' : '' }}" id="section-membres">
+    <div class="section" id="section-membres">
         <div class="panel">
             <div class="panel-header"><div class="panel-title">Ajouter un membre</div></div>
             <div class="panel-body">
@@ -199,13 +305,24 @@
             <div class="panel-header"><div class="panel-title">Liste des membres</div></div>
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>ID</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Adresse</th><th>Naissance</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Statut</th><th>Actions</th></tr></thead>
                     <tbody>
                         @foreach($membres as $m)
                         <tr>
-                            <td>#{{ $m->id }}</td><td>{{ $m->nom }}</td><td>{{ $m->prenom }}</td>
-                            <td>{{ $m->email }}</td><td>{{ $m->telephone }}</td><td>{{ $m->adresse }}</td>
-                            <td>{{ $m->date_naissance }}</td>
+                            <td>#{{ $m->id }}</td>
+                            <td>{{ $m->nom }}</td>
+                            <td>{{ $m->prenom }}</td>
+                            <td>{{ $m->email }}</td>
+                            <td>{{ $m->telephone }}</td>
+                            <td>
+                                @if($m->statut === 'approuve')
+                                    <span class="badge badge-green">Approuvé</span>
+                                @elseif($m->statut === 'refuse')
+                                    <span class="badge badge-danger">Refusé</span>
+                                @else
+                                    <span class="badge badge-yellow">En attente</span>
+                                @endif
+                            </td>
                             <td><div class="actions">
                                 <a href="/admin/membre/{{ $m->id }}" class="btn btn-profil">Voir profil</a>
                                 <button class="btn btn-edit" onclick="openEditMembre({{ $m->id }},'{{ addslashes($m->nom) }}','{{ addslashes($m->prenom) }}','{{ $m->email }}','{{ $m->telephone }}','{{ addslashes($m->adresse) }}','{{ $m->date_naissance }}')">Modifier</button>
@@ -220,7 +337,7 @@
     </div>
 
     <!-- TONTINES -->
-    <div class="section {{ session('section') === 'tontines' ? 'active' : '' }}" id="section-tontines">
+    <div class="section" id="section-tontines">
         <div class="panel">
             <div class="panel-header"><div class="panel-title">Créer une tontine</div></div>
             <div class="panel-body">
@@ -248,7 +365,7 @@
             <div class="panel-header"><div class="panel-title">Liste des tontines</div></div>
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>ID</th><th>Nom</th><th>Description</th><th>Montant</th><th>Début</th><th>Fin</th><th>Fréquence</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Nom</th><th>Description</th><th>Montant</th><th>Début</th><th>Fin</th><th>Fréquence</th><th>Membres</th><th>Actions</th></tr></thead>
                     <tbody>
                         @foreach($tontines as $t)
                         <tr>
@@ -256,7 +373,9 @@
                             <td>{{ number_format($t->montant, 0, ',', ' ') }} F</td>
                             <td>{{ $t->date_debut }}</td><td>{{ $t->date_fin }}</td>
                             <td><span class="badge badge-yellow">{{ $t->frequence }}</span></td>
+                            <td><span class="badge badge-green">{{ $t->membres->count() }} membre(s)</span></td>
                             <td><div class="actions">
+                                <button class="btn btn-profil" onclick="voirMembresTontine({{ $t->id }})">👥 Gérer</button>
                                 <button class="btn btn-edit" onclick="openEditTontine({{ $t->id }},'{{ addslashes($t->nom) }}','{{ addslashes($t->description) }}',{{ $t->montant }},'{{ $t->date_debut }}','{{ $t->date_fin }}','{{ $t->frequence }}')">Modifier</button>
                                 <form action="/tontine/{{ $t->id }}" method="post" onsubmit="return confirm('Supprimer cette tontine ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
                             </div></td>
@@ -266,25 +385,63 @@
                 </table>
             </div>
         </div>
+        <div class="panel" id="panel-membres-tontine" style="display:none;">
+            <div class="panel-header">
+                <div class="panel-title">Gérer les membres de : <span id="nom-tontine-membres" style="color:var(--green-mid);"></span></div>
+                <button class="btn btn-secondary" onclick="document.getElementById('panel-membres-tontine').style.display='none'">Fermer</button>
+            </div>
+            <div class="panel-body">
+                <form id="formAjouterMembreTontine" method="post" style="margin-bottom:1.5rem;">
+                    @csrf
+                    <div style="display:flex;gap:1rem;align-items:flex-end;">
+                        <div class="form-group">
+                            <label class="form-label">Membre à ajouter</label>
+                            <select name="membre_id" class="form-control" style="width:300px;" required>
+                                <option value="">Choisir un membre</option>
+                                @foreach($membres as $m)
+                                <option value="{{ $m->id }}">{{ $m->nom }} {{ $m->prenom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Ajouter à la tontine</button>
+                    </div>
+                </form>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Rôle</th><th>Actions</th></tr></thead>
+                        <tbody id="tbody-membres-tontine"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- COTISATIONS -->
-    <div class="section {{ session('section') === 'cotisations' ? 'active' : '' }}" id="section-cotisations">
+    <div class="section" id="section-cotisations">
         <div class="panel">
             <div class="panel-header"><div class="panel-title">Ajouter une cotisation</div></div>
             <div class="panel-body">
                 <form action="/cotisation" method="post">
                     @csrf
                     <div class="form-grid">
-                        <div class="form-group"><label class="form-label">Montant (F CFA)</label><input type="number" name="montant" class="form-control" required></div>
-                        <div class="form-group"><label class="form-label">Date de cotisation</label><input type="date" name="date_cotisation" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Tontine</label>
+                            <select name="tontine_id" class="form-control" required>
+                                <option value="">Choisir une tontine</option>
+                                @foreach($tontines as $t)
+                                <option value="{{ $t->id }}">{{ $t->nom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="form-group"><label class="form-label">Membre</label>
-                            <select name="membre_id" class="form-control">
+                            <select name="membre_id" class="form-control" required>
+                                <option value="">Choisir un membre</option>
                                 @foreach($membres as $m)
                                 <option value="{{ $m->id }}">{{ $m->nom }} {{ $m->prenom }}</option>
                                 @endforeach
                             </select>
                         </div>
+                        <div class="form-group"><label class="form-label">Montant (F CFA)</label><input type="number" name="montant" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Date de cotisation</label><input type="date" name="date_cotisation" class="form-control" required></div>
                     </div>
                     <div class="btn-row"><button type="submit" class="btn btn-primary">Enregistrer</button></div>
                 </form>
@@ -294,16 +451,17 @@
             <div class="panel-header"><div class="panel-title">Liste des cotisations</div></div>
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>ID</th><th>Montant</th><th>Date</th><th>Membre</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Tontine</th><th>Montant</th><th>Date</th><th>Membre</th><th>Actions</th></tr></thead>
                     <tbody>
                         @foreach($cotisations as $c)
                         <tr>
                             <td>#{{ $c->id }}</td>
+                            <td>{{ $c->tontine->nom ?? '—' }}</td>
                             <td>{{ number_format($c->montant, 0, ',', ' ') }} F</td>
                             <td>{{ $c->date_cotisation }}</td>
                             <td>{{ $c->membre->nom ?? '—' }} {{ $c->membre->prenom ?? '' }}</td>
                             <td><div class="actions">
-                                <button class="btn btn-edit" onclick="openEditCotisation({{ $c->id }},{{ $c->montant }},'{{ $c->date_cotisation }}',{{ $c->membre_id }})">Modifier</button>
+                                <button class="btn btn-edit" onclick="openEditCotisation({{ $c->id }},{{ $c->montant }},'{{ $c->date_cotisation }}',{{ $c->membre_id ?? 0 }},{{ $c->tontine_id ?? 0 }})">Modifier</button>
                                 <form action="/cotisation/{{ $c->id }}" method="post" onsubmit="return confirm('Supprimer cette cotisation ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
                             </div></td>
                         </tr>
@@ -315,13 +473,21 @@
     </div>
 
     <!-- TOURS -->
-    <div class="section {{ session('section') === 'tours' ? 'active' : '' }}" id="section-tours">
+    <div class="section" id="section-tours">
         <div class="panel">
             <div class="panel-header"><div class="panel-title">Ajouter un tour</div></div>
             <div class="panel-body">
                 <form action="/tour" method="post">
                     @csrf
                     <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Tontine</label>
+                            <select name="tontine_id" class="form-control" required>
+                                <option value="">Choisir une tontine</option>
+                                @foreach($tontines as $t)
+                                <option value="{{ $t->id }}">{{ $t->nom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="form-group"><label class="form-label">Date du tour</label><input type="date" name="date_tour" class="form-control" required></div>
                         <div class="form-group"><label class="form-label">État</label>
                             <select name="etat" class="form-control">
@@ -338,15 +504,16 @@
             <div class="panel-header"><div class="panel-title">Liste des tours</div></div>
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>ID</th><th>Date</th><th>État</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Tontine</th><th>Date</th><th>État</th><th>Actions</th></tr></thead>
                     <tbody>
                         @foreach($tours as $tour)
                         <tr>
                             <td>#{{ $tour->id }}</td>
+                            <td>{{ $tour->tontine->nom ?? '—' }}</td>
                             <td>{{ $tour->date_tour }}</td>
                             <td><span class="badge {{ $tour->etat === 'terminer' ? 'badge-green' : 'badge-yellow' }}">{{ $tour->etat === 'terminer' ? 'Terminé' : 'En attente' }}</span></td>
                             <td><div class="actions">
-                                <button class="btn btn-edit" onclick="openEditTour({{ $tour->id }},'{{ $tour->date_tour }}','{{ $tour->etat }}')">Modifier</button>
+                                <button class="btn btn-edit" onclick="openEditTour({{ $tour->id }},{{ $tour->tontine_id ?? 0 }},'{{ $tour->date_tour }}','{{ $tour->etat }}')">Modifier</button>
                                 <form action="/tour/{{ $tour->id }}" method="post" onsubmit="return confirm('Supprimer ce tour ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
                             </div></td>
                         </tr>
@@ -410,10 +577,17 @@
         <div class="modal-title">Modifier la cotisation</div>
         <form id="formEditCotisation" method="post">@csrf @method('PUT')
             <div class="form-grid">
+                <div class="form-group"><label class="form-label">Tontine</label>
+                    <select name="tontine_id" id="ec_tontine" class="form-control" required>
+                        @foreach($tontines as $t)
+                        <option value="{{ $t->id }}">{{ $t->nom }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="form-group"><label class="form-label">Montant</label><input type="number" name="montant" id="ec_montant" class="form-control" required></div>
                 <div class="form-group"><label class="form-label">Date</label><input type="date" name="date_cotisation" id="ec_date" class="form-control" required></div>
                 <div class="form-group"><label class="form-label">Membre</label>
-                    <select name="membre_id" id="ec_membre" class="form-control">
+                    <select name="membre_id" id="ec_membre" class="form-control" required>
                         @foreach($membres as $m)
                         <option value="{{ $m->id }}">{{ $m->nom }} {{ $m->prenom }}</option>
                         @endforeach
@@ -433,6 +607,13 @@
         <div class="modal-title">Modifier le tour</div>
         <form id="formEditTour" method="post">@csrf @method('PUT')
             <div class="form-grid">
+                <div class="form-group"><label class="form-label">Tontine</label>
+                    <select name="tontine_id" id="etour_tontine" class="form-control" required>
+                        @foreach($tontines as $t)
+                        <option value="{{ $t->id }}">{{ $t->nom }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="form-group"><label class="form-label">Date du tour</label><input type="date" name="date_tour" id="etour_date" class="form-control" required></div>
                 <div class="form-group"><label class="form-label">État</label>
                     <select name="etat" id="etour_etat" class="form-control">
@@ -454,17 +635,12 @@
 
     const titles = {
         home: 'Tableau de <span>bord</span>',
+        inscriptions: 'Inscriptions en <span>attente</span>',
         membres: 'Gestion des <span>membres</span>',
         tontines: 'Gestion des <span>tontines</span>',
         cotisations: 'Gestion des <span>cotisations</span>',
         tours: 'Gestion des <span>tours</span>',
     };
-
-    const activeSection = document.querySelector('.section.active');
-    if (activeSection) {
-        const name = activeSection.id.replace('section-', '');
-        document.getElementById('pageTitle').innerHTML = titles[name] || name;
-    }
 
     function showSection(name, btn) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -472,6 +648,16 @@
         document.getElementById('section-' + name).classList.add('active');
         if (btn) btn.classList.add('active');
         document.getElementById('pageTitle').innerHTML = titles[name] || name;
+    }
+
+    function goToSection(name) {
+        const navButtons = document.querySelectorAll('.nav-item');
+        let targetBtn = null;
+        navButtons.forEach(btn => {
+            const onclick = btn.getAttribute('onclick');
+            if (onclick && onclick.includes("'" + name + "'")) targetBtn = btn;
+        });
+        showSection(name, targetBtn);
     }
 
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -498,16 +684,18 @@
         document.getElementById('modalTontine').classList.add('open');
     }
 
-    function openEditCotisation(id, montant, date, membre_id) {
+    function openEditCotisation(id, montant, date, membre_id, tontine_id) {
         document.getElementById('formEditCotisation').action = '/cotisation/' + id;
         document.getElementById('ec_montant').value = montant;
         document.getElementById('ec_date').value = date;
-        document.getElementById('ec_membre').value = membre_id;
+        if (membre_id) document.getElementById('ec_membre').value = membre_id;
+        if (tontine_id) document.getElementById('ec_tontine').value = tontine_id;
         document.getElementById('modalCotisation').classList.add('open');
     }
 
-    function openEditTour(id, date, etat) {
+    function openEditTour(id, tontine_id, date, etat) {
         document.getElementById('formEditTour').action = '/tour/' + id;
+        if (tontine_id) document.getElementById('etour_tontine').value = tontine_id;
         document.getElementById('etour_date').value = date;
         document.getElementById('etour_etat').value = etat;
         document.getElementById('modalTour').classList.add('open');
@@ -517,15 +705,41 @@
         o.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
     });
 
-    // ==================== GRAPHES ====================
+    const tontinesData = @json($tontines->load('membres'));
 
-    // Données depuis Laravel
+    function voirMembresTontine(tontineId) {
+        const tontine = tontinesData.find(t => t.id === tontineId);
+        if (!tontine) return;
+        document.getElementById('nom-tontine-membres').textContent = tontine.nom;
+        document.getElementById('formAjouterMembreTontine').action = '/tontine/' + tontineId + '/membre';
+        const tbody = document.getElementById('tbody-membres-tontine');
+        tbody.innerHTML = '';
+        if (tontine.membres && tontine.membres.length > 0) {
+            tontine.membres.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>#${m.id}</td><td>${m.nom}</td><td>${m.prenom}</td><td>${m.email}</td>
+                    <td><span class="badge ${m.pivot && m.pivot.role === 'admin' ? 'badge-green' : 'badge-yellow'}">${m.pivot && m.pivot.role === 'admin' ? 'Admin' : 'Membre'}</span></td>
+                    <td><div class="actions">
+                        <form action="/tontine/${tontineId}/membre/${m.id}" method="post" onsubmit="return confirm('Retirer ce membre ?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">Retirer</button>
+                        </form>
+                    </div></td>`;
+                tbody.appendChild(tr);
+            });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty">Aucun membre.</td></tr>';
+        }
+        document.getElementById('panel-membres-tontine').style.display = 'block';
+        document.getElementById('panel-membres-tontine').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // GRAPHES
     const cotisations = @json($cotisations);
     const membres = @json($membres);
-
     const moisLabels = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
-
-    // Grouper cotisations par mois
     const cotisParMois = Array(12).fill(0);
     const totalParMois = Array(12).fill(0);
     cotisations.forEach(c => {
@@ -533,13 +747,9 @@
         cotisParMois[mois]++;
         totalParMois[mois] += parseFloat(c.montant);
     });
-
-    // Cumul pour le graphe ligne
     const cumulParMois = [];
     let cumul = 0;
     totalParMois.forEach(v => { cumul += v; cumulParMois.push(cumul); });
-
-    // Membres les plus actifs
     const cotisParMembre = {};
     cotisations.forEach(c => {
         const m = membres.find(mb => mb.id === c.membre_id);
@@ -549,77 +759,22 @@
     const topMembres = Object.entries(cotisParMembre).sort((a,b) => b[1]-a[1]).slice(0,6);
     const couleursDonut = ['#0d3d2b','#1a6645','#2d9e68','#3ecf8e','#f0a500','#ffd166'];
 
-    // GRAPHE LIGNE — Évolution total collecté
     new Chart(document.getElementById('chartLigne'), {
         type: 'line',
-        data: {
-            labels: moisLabels,
-            datasets: [{
-                label: 'Total collecté (F CFA)',
-                data: cumulParMois,
-                borderColor: '#1a6645',
-                backgroundColor: 'rgba(26,102,69,0.08)',
-                borderWidth: 2.5,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#1a6645',
-                pointRadius: 4,
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { grid: { color: '#e2ece8' }, ticks: { color: '#6b8c7a', font: { size: 11 } } },
-                y: { grid: { color: '#e2ece8' }, ticks: { color: '#6b8c7a', font: { size: 11 }, callback: v => v.toLocaleString('fr') + ' F' } }
-            }
-        }
+        data: { labels: moisLabels, datasets: [{ label: 'Total collecté (F CFA)', data: cumulParMois, borderColor: '#1a6645', backgroundColor: 'rgba(26,102,69,0.08)', borderWidth: 2.5, fill: true, tension: 0.4, pointBackgroundColor: '#1a6645', pointRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#e2ece8' }, ticks: { color: '#6b8c7a', font: { size: 11 } } }, y: { grid: { color: '#e2ece8' }, ticks: { color: '#6b8c7a', font: { size: 11 }, callback: v => v.toLocaleString('fr') + ' F' } } } }
     });
 
-    // GRAPHE BARRES — Cotisations par mois
     new Chart(document.getElementById('chartBarres'), {
         type: 'bar',
-        data: {
-            labels: moisLabels,
-            datasets: [{
-                label: 'Nombre de cotisations',
-                data: cotisParMois,
-                backgroundColor: 'rgba(26,102,69,0.75)',
-                borderRadius: 6,
-                borderSkipped: false,
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { grid: { display: false }, ticks: { color: '#6b8c7a', font: { size: 10 } } },
-                y: { grid: { color: '#e2ece8' }, ticks: { color: '#6b8c7a', font: { size: 10 }, stepSize: 1 } }
-            }
-        }
+        data: { labels: moisLabels, datasets: [{ label: 'Nombre de cotisations', data: cotisParMois, backgroundColor: 'rgba(26,102,69,0.75)', borderRadius: 6, borderSkipped: false }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#6b8c7a', font: { size: 10 } } }, y: { grid: { color: '#e2ece8' }, ticks: { color: '#6b8c7a', font: { size: 10 }, stepSize: 1 } } } }
     });
 
-    // GRAPHE CAMEMBERT — Membres les plus actifs
     new Chart(document.getElementById('chartCamembert'), {
         type: 'doughnut',
-        data: {
-            labels: topMembres.map(m => m[0]),
-            datasets: [{
-                data: topMembres.map(m => m[1]),
-                backgroundColor: couleursDonut,
-                borderWidth: 2,
-                borderColor: '#ffffff',
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { font: { size: 10 }, color: '#1a2e22', padding: 8, boxWidth: 12 }
-                }
-            }
-        }
+        data: { labels: topMembres.map(m => m[0]), datasets: [{ data: topMembres.map(m => m[1]), backgroundColor: couleursDonut, borderWidth: 2, borderColor: '#ffffff' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, color: '#1a2e22', padding: 8, boxWidth: 12 } } } }
     });
 </script>
 </body>

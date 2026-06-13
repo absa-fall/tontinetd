@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Cotisation extends Model
 {
     protected $fillable = [
-        'id',
+        'membre_id',
+        'tontine_id',
         'montant',
         'date_cotisation',
-        'membre_id',
         'ajout_par',
         'moyen_paiement',
     ];
@@ -18,5 +18,10 @@ class Cotisation extends Model
     public function membre()
     {
         return $this->belongsTo(Membre::class);
+    }
+
+    public function tontine()
+    {
+        return $this->belongsTo(Tontine::class);
     }
 }
