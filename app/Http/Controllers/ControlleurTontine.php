@@ -62,7 +62,15 @@ class ControlleurTontine extends Controller
         $tontine = Tontine::findOrFail($id);
         $tontine->update($request->all());
 
-        return redirect('/dashboard')->with('success', 'Tontine modifiée avec succès !')->with('section', 'tontines');
+        return back()->with('success', 'Tontine modifiée avec succès !')->with('section', 'tontines');
+    }
+    public function details($id)
+    {
+        $tontine = Tontine::with(['membres', 'tours.membre', 'cotisations.membre'])->findOrFail($id);
+
+        $nbToursTermines = $tontine->tours->where('etat', 'terminer')->count();
+
+        return view('tontine-details', compact('tontine', 'nbToursTermines'));
     }
 
     public function destroy($id)
@@ -72,7 +80,20 @@ class ControlleurTontine extends Controller
 
     return redirect('/dashboard')->with('success', 'Tontine supprimée avec succès !')->with('section', 'tontines');
 }
+public function supprimerSelection(Request $request)
+    {
+        $ids = $request->input('tontine_ids', []);
+        Tontine::whereIn('id', $ids)->delete();
 
+        return back()->with('success', 'Tontines supprimées avec succès !')->with('section', 'tontines');
+    }
+
+    public function supprimerTout()
+    {
+        Tontine::truncate();
+
+        return back()->with('success', 'Toutes les tontines ont été supprimées !')->with('section', 'tontines');
+    }
     public function ajouterMembre(Request $request, $tontineId)
     {
         $request->validate([

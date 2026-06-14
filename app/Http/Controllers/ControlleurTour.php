@@ -102,4 +102,18 @@ class ControlleurTour extends Controller
 
         return redirect('/dashboard')->with('success', 'Tour supprimé avec succès !')->with('section', 'tours');
     }
+    public function supprimerSelection(Request $request)
+    {
+        $ids = $request->input('tour_ids', []);
+        Tour::whereIn('id', $ids)->delete();
+
+        return back()->with('success', 'Tours supprimés avec succès !')->with('section', 'tours');
+    }
+
+    public function supprimerTout()
+    {
+        Tour::truncate();
+
+        return back()->with('success', 'Tous les tours ont été supprimés !')->with('section', 'tours');
+    }
 }

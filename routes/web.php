@@ -62,7 +62,9 @@ Route::put('/tontine/{id}', [ControlleurTontine::class, 'update']);
 Route::delete('/tontine/{id}', [ControlleurTontine::class, 'destroy']);
 Route::post('/tontine/{tontineId}/membre', [ControlleurTontine::class, 'ajouterMembre']);
 Route::delete('/tontine/{tontineId}/membre/{membreId}', [ControlleurTontine::class, 'retirerMembre']);
-
+Route::post('/tontines/supprimer-selection', [ControlleurTontine::class, 'supprimerSelection']);
+Route::post('/tontines/supprimer-tout', [ControlleurTontine::class, 'supprimerTout']);
+Route::get('/tontine/{id}/details', [ControlleurTontine::class, 'details']);
 // -----------------------------------------------
 // COTISATIONS
 // -----------------------------------------------
@@ -70,6 +72,8 @@ Route::get('/cotisations', [ControlleurCotisation::class, 'index']);
 Route::post('/cotisation', [ControlleurCotisation::class, 'store']);
 Route::put('/cotisation/{id}', [ControlleurCotisation::class, 'update']);
 Route::delete('/cotisation/{id}', [ControlleurCotisation::class, 'destroy']);
+Route::post('/cotisations/supprimer-selection', [ControlleurCotisation::class, 'supprimerSelection']);
+Route::post('/cotisations/supprimer-tout', [ControlleurCotisation::class, 'supprimerTout']);
 
 // -----------------------------------------------
 // TOURS
@@ -79,6 +83,8 @@ Route::post('/tour', [ControlleurTour::class, 'store']);
 Route::put('/tour/{id}', [ControlleurTour::class, 'update']);
 Route::delete('/tour/{id}', [ControlleurTour::class, 'destroy']);
 Route::post('/tour/{id}/mode-reception', [ControlleurTour::class, 'choisirModeReception']);
+Route::post('/tours/supprimer-selection', [ControlleurTour::class, 'supprimerSelection']);
+Route::post('/tours/supprimer-tout', [ControlleurTour::class, 'supprimerTout']);
 // -----------------------------------------------
 // ESPACE MEMBRE
 // -----------------------------------------------

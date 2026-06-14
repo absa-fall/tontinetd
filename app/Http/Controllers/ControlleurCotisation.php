@@ -75,4 +75,18 @@ class ControlleurCotisation extends Controller
 
         return redirect('/dashboard')->with('success', 'Cotisation supprimée avec succès !')->with('section', 'cotisations');
     }
+    public function supprimerSelection(Request $request)
+    {
+        $ids = $request->input('cotisation_ids', []);
+        Cotisation::whereIn('id', $ids)->delete();
+
+        return back()->with('success', 'Cotisations supprimées avec succès !')->with('section', 'cotisations');
+    }
+
+    public function supprimerTout()
+    {
+        Cotisation::truncate();
+
+        return back()->with('success', 'Toutes les cotisations ont été supprimées !')->with('section', 'cotisations');
+    }
 }
