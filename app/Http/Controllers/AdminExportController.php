@@ -11,10 +11,10 @@ use App\Models\NotificationAdmin;
 use App\Exports\TransactionsExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Session;
 
 class AdminExportController extends Controller
 {
-    // Export PDF d'un membre
     public function pdfMembre($id)
     {
         $membre = Membre::with('cotisations')->findOrFail($id);
@@ -22,14 +22,12 @@ class AdminExportController extends Controller
         return $pdf->download('transactions-' . $membre->nom . '.pdf');
     }
 
-    // Export Excel d'un membre
     public function excelMembre($id)
     {
         $membre = Membre::with('cotisations')->findOrFail($id);
         return Excel::download(new TransactionsExport($membre), 'transactions-' . $membre->nom . '.xlsx');
     }
 
-    // Export PDF global
     public function pdfGlobal()
     {
         $membres     = Membre::with('cotisations')->get();
@@ -40,7 +38,6 @@ class AdminExportController extends Controller
         return $pdf->download('rapport-global.pdf');
     }
 
-    // Envoyer notification à tous les membres pour un tour
     public function notifierTour($tourId)
     {
         $tour    = Tour::findOrFail($tourId);
@@ -57,7 +54,6 @@ class AdminExportController extends Controller
         return back()->with('success', 'Notifications envoyées à tous les membres !');
     }
 
-    // Approuver un membre
     public function approuverMembre($id)
     {
         $membre = Membre::findOrFail($id);
@@ -65,17 +61,16 @@ class AdminExportController extends Controller
 
         NotificationMembre::create([
             'membre_id' => $membre->id,
-            'titre'     => '✅ Compte approuvé',
-            'message'   => 'Félicitations ' . $membre->prenom . ' ! Votre compte a été approuvé par l\'administrateur. Vous pouvez maintenant accéder à votre espace membre.',
+            'titre'     => 'Compte approuvé',
+            'message'   => 'Félicitations ' . $membre->prenom . ' ! Votre compte a été approuvé. Vous pouvez maintenant accéder à votre espace membre.',
             'lu'        => false,
         ]);
 
         NotificationAdmin::where('membre_id', $membre->id)->update(['lu' => true]);
 
-        return back()->with('success', $membre->prenom . ' ' . $membre->nom . ' a été approuvé avec succès !');
+        return back()->with('success', $membre->prenom . ' a été approuvé !')->with('section', 'inscriptions');
     }
 
-    // Refuser un membre
     public function refuserMembre($id)
     {
         $membre = Membre::findOrFail($id);
@@ -83,95 +78,176 @@ class AdminExportController extends Controller
 
         NotificationMembre::create([
             'membre_id' => $membre->id,
-            'titre'     => '❌ Compte refusé',
-            'message'   => 'Votre demande d\'inscription a été refusée par l\'administrateur. Contactez-nous pour plus d\'informations.',
+            'titre'     => 'Compte refusé',
+            'message'   => 'Votre demande d\'inscription a été refusée. Contactez-nous pour plus d\'informations.',
             'lu'        => false,
         ]);
 
         NotificationAdmin::where('membre_id', $membre->id)->update(['lu' => true]);
 
-        return back()->with('success', $membre->prenom . ' ' . $membre->nom . ' a été refusé.');
+        return back()->with('success', $membre->prenom . ' a été refusé.')->with('section', 'inscriptions');
     }
 
-    // Approuver tous les membres en attente
     public function approuverTout()
     {
         $membres = Membre::where('statut', 'en_attente')->get();
 
         foreach ($membres as $membre) {
             $membre->update(['statut' => 'approuve']);
-
             NotificationMembre::create([
                 'membre_id' => $membre->id,
-                'titre'     => '✅ Compte approuvé',
-                'message'   => 'Félicitations ' . $membre->prenom . ' ! Votre compte a été approuvé par l\'administrateur. Vous pouvez maintenant accéder à votre espace membre.',
+                'titre'     => 'Compte approuvé',
+                'message'   => 'Félicitations ' . $membre->prenom . ' ! Votre compte a été approuvé.',
                 'lu'        => false,
             ]);
         }
 
         NotificationAdmin::whereIn('membre_id', $membres->pluck('id'))->update(['lu' => true]);
 
-        return back()->with('success', $membres->count() . ' membre(s) approuvé(s) avec succès !');
+        return back()->with('success', $membres->count() . ' membre(s) approuvé(s) !')->with('section', 'inscriptions');
     }
 
-    // Refuser tous les membres en attente
     public function refuserTout()
     {
         $membres = Membre::where('statut', 'en_attente')->get();
 
         foreach ($membres as $membre) {
             $membre->update(['statut' => 'refuse']);
-
             NotificationMembre::create([
                 'membre_id' => $membre->id,
-                'titre'     => '❌ Compte refusé',
-                'message'   => 'Votre demande d\'inscription a été refusée par l\'administrateur. Contactez-nous pour plus d\'informations.',
+                'titre'     => 'Compte refusé',
+                'message'   => 'Votre demande d\'inscription a été refusée.',
                 'lu'        => false,
             ]);
         }
 
         NotificationAdmin::whereIn('membre_id', $membres->pluck('id'))->update(['lu' => true]);
 
-        return back()->with('success', $membres->count() . ' membre(s) refusé(s).');
+        return back()->with('success', $membres->count() . ' membre(s) refusé(s).')->with('section', 'inscriptions');
     }
 
-    // Rendre un membre admin d'une tontine
-    public function rendreAdmin($tontineId, $membreId)
+    // Rendre admin d'une tontine (table pivot)
+    public function rendreAdminTontine($tontineId, $membreId)
     {
         $tontine = Tontine::findOrFail($tontineId);
-
-        // Remettre tous les membres de la tontine en 'membre'
         $tontine->membres()->updateExistingPivot(
             $tontine->membres->pluck('id')->toArray(),
             ['role' => 'membre']
         );
-
-        // Rendre le membre choisi admin
         $tontine->membres()->updateExistingPivot($membreId, ['role' => 'admin']);
 
         $membre = Membre::findOrFail($membreId);
-
         NotificationMembre::create([
             'membre_id' => $membreId,
-            'titre'     => '⭐ Vous êtes admin',
-            'message'   => 'Vous avez été nommé administrateur de la tontine "' . $tontine->nom . '" par l\'administrateur principal.',
+            'titre'     => 'Vous êtes admin de tontine',
+            'message'   => 'Vous avez été nommé administrateur de la tontine "' . $tontine->nom . '".',
             'lu'        => false,
         ]);
 
-        return back()->with('success', $membre->prenom . ' ' . $membre->nom . ' est maintenant admin de la tontine "' . $tontine->nom . '" !');
+        return back()->with('success', $membre->prenom . ' est maintenant admin de "' . $tontine->nom . '" !')->with('section', 'tontines');
     }
 
-    // Marquer toutes les notifications admin comme lues
+    // Rendre admin global (accès dashboard)
+    public function rendreAdmin($id)
+    {
+        if (Session::get('role') !== 'super_admin') {
+            return redirect()->back()->with('error', 'Action non autorisée.')->with('section', 'membres');
+        }
+
+        $membre = Membre::findOrFail($id);
+        $membre->update(['role' => 'admin']);
+
+        NotificationMembre::create([
+            'membre_id' => $membre->id,
+            'titre'     => 'Vous êtes maintenant admin',
+            'message'   => 'Félicitations ' . $membre->prenom . ' ! Vous avez été nommé administrateur de TontineTD.',
+            'lu'        => false,
+        ]);
+
+        return back()->with('success', $membre->prenom . ' est maintenant admin !')->with('section', 'membres');
+    }
+
+    // Rendre gérant (accès dashboard gérant)
+    public function rendreGerant($id)
+    {
+        if (Session::get('role') !== 'super_admin') {
+            return redirect()->back()->with('error', 'Action non autorisée.')->with('section', 'membres');
+        }
+
+        $membre = Membre::findOrFail($id);
+        $membre->update(['role' => 'gerant']);
+
+        NotificationMembre::create([
+            'membre_id' => $membre->id,
+            'titre'     => 'Vous êtes maintenant gérant',
+            'message'   => 'Félicitations ' . $membre->prenom . ' ! Vous avez été nommé gérant de TontineTD.',
+            'lu'        => false,
+        ]);
+
+        return back()->with('success', $membre->prenom . ' est maintenant gérant !')->with('section', 'membres');
+    }
+
+    // Retirer le rôle (redevient membre simple)
+    public function retirerRole($id)
+    {
+        if (Session::get('role') !== 'super_admin') {
+            return redirect()->back()->with('error', 'Action non autorisée.')->with('section', 'membres');
+        }
+
+        $membre = Membre::findOrFail($id);
+        $membre->update(['role' => 'membre']);
+
+        NotificationMembre::create([
+            'membre_id' => $membre->id,
+            'titre'     => 'Rôle retiré',
+            'message'   => 'Votre rôle a été retiré par l\'administrateur. Vous êtes maintenant membre simple.',
+            'lu'        => false,
+        ]);
+
+        return back()->with('success', 'Rôle retiré pour ' . $membre->prenom . '.')->with('section', 'membres');
+    }
+
+    // Activer un membre
+    public function activer($id)
+    {
+        $membre = Membre::findOrFail($id);
+        $membre->update(['statut' => 'approuve']);
+
+        NotificationMembre::create([
+            'membre_id' => $membre->id,
+            'titre'     => 'Compte activé',
+            'message'   => 'Votre compte a été activé. Vous pouvez maintenant vous connecter.',
+            'lu'        => false,
+        ]);
+
+        return back()->with('success', $membre->prenom . ' a été activé !')->with('section', 'membres');
+    }
+
+    // Désactiver un membre
+    public function desactiver($id)
+    {
+        $membre = Membre::findOrFail($id);
+        $membre->update(['statut' => 'desactive']);
+
+        NotificationMembre::create([
+            'membre_id' => $membre->id,
+            'titre'     => 'Compte désactivé',
+            'message'   => 'Votre compte a été désactivé. Contactez l\'administrateur.',
+            'lu'        => false,
+        ]);
+
+        return back()->with('success', $membre->prenom . ' a été désactivé.')->with('section', 'membres');
+    }
+
     public function marquerToutLu()
     {
         NotificationAdmin::where('lu', false)->update(['lu' => true]);
-        return back()->with('success', 'Toutes les notifications ont été marquées comme lues.');
+        return back()->with('success', 'Toutes les notifications ont été marquées comme lues.')->with('section', 'inscriptions');
     }
 
-    // Supprimer toutes les notifications admin
     public function supprimerToutNotifs()
     {
         NotificationAdmin::truncate();
-        return back()->with('success', 'Toutes les notifications ont été supprimées.');
+        return back()->with('success', 'Toutes les notifications ont été supprimées.')->with('section', 'inscriptions');
     }
 }

@@ -13,7 +13,7 @@ class ControlleurCotisation extends Controller
         return view('cotisations.index', compact('cotisations'));
     }
 
-    public function store(Request $request)
+   public function store(Request $request)
     {
         $request->validate([
             'montant'         => 'required|numeric|min:1',
@@ -22,11 +22,30 @@ class ControlleurCotisation extends Controller
             'tontine_id'      => 'required|exists:tontines,id',
         ]);
 
+        // Vérifier le tour en cours pour cette tontine
+        $tourEnCours = \App\Models\Tour::where('tontine_id', $request->tontine_id)
+            ->where('etat', 'en_attente')
+            ->orderBy('date_tour', 'asc')
+            ->first();
+
+        if (!$tourEnCours) {
+            return redirect('/dashboard')
+                ->with('error', 'Aucun tour en attente pour cette tontine.')
+                ->with('section', 'cotisations');
+        }
+
+        if (now()->toDateString() > $tourEnCours->date_tour) {
+            return redirect('/dashboard')
+                ->with('error', 'La date de ce tour est dépassée, vous ne pouvez plus cotiser.')
+                ->with('section', 'cotisations');
+        }
+
         Cotisation::create([
             'montant'         => $request->montant,
             'date_cotisation' => $request->date_cotisation,
             'membre_id'       => $request->membre_id,
             'tontine_id'      => $request->tontine_id,
+            'tour_id'         => $tourEnCours->id,
             'ajout_par'       => 'admin',
             'moyen_paiement'  => 'cash',
         ]);

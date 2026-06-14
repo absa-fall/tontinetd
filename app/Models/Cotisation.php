@@ -9,6 +9,7 @@ class Cotisation extends Model
     protected $fillable = [
         'membre_id',
         'tontine_id',
+        'tour_id',
         'montant',
         'date_cotisation',
         'ajout_par',
@@ -23,5 +24,10 @@ class Cotisation extends Model
     public function tontine()
     {
         return $this->belongsTo(Tontine::class);
+    }
+
+    public function tour()
+    {
+        return $this->belongsTo(Tour::class);
     }
 }

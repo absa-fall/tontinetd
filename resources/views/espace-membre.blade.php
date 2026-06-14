@@ -160,7 +160,14 @@
     </div>
     <div class="nav-label">Menu</div>
     <button class="nav-item active" onclick="showSection('accueil', this)">Accueil</button>
-    <button class="nav-item" onclick="showSection('tontines', this)">Mes tontines</button>
+   <button class="nav-item" onclick="showSection('tontines', this)">Mes tontines</button>
+    <button class="nav-item" onclick="showSection('tours', this)">Tours</button>
+    @if($tontinesGerees->count() > 0)
+    <button class="nav-item" onclick="showSection('gestion', this)">
+        Gérer mes tontines
+        <span class="notif-badge" style="background:var(--gold);color:var(--green-dark);">{{ $tontinesGerees->count() }}</span>
+    </button>
+    @endif
     <button class="nav-item" onclick="showSection('cotisations', this)">Mes cotisations</button>
     <button class="nav-item" onclick="showSection('notifications', this)">
         Notifications
@@ -279,7 +286,197 @@
             </div>
         @endif
     </div>
+<!-- TOURS -->
+    <div class="section" id="section-tours">
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">Tours programmés</div></div>
+            <div class="table-wrap">
+                @php
+                    $tousLesTours = $membre->tontines->flatMap(function($t) {
+                        return $t->tours->map(function($tour) use ($t) {
+                            $tour->nom_tontine = $t->nom;
+                            return $tour;
+                        });
+                    })->sortBy('date_tour');
+                @endphp
+                @if($tousLesTours->count() > 0)
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tontine</th>
+                            <th>Date</th>
+                            <th>État</th>
+                            <th>Bénéficiaire</th>
+                            <th>Mode réception</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($tousLesTours as $tour)
+                        <tr>
+                            <td>{{ $tour->nom_tontine }}</td>
+                            <td>{{ \Carbon\Carbon::parse($tour->date_tour)->format('d/m/Y') }}</td>
+                            <td>
+                                @if($tour->etat === 'terminer')
+                                    <span class="badge-success">Terminé</span>
+                                @else
+                                    <span class="badge-wave">En attente</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($tour->membre_id === $membre->id)
+                                    <strong style="color:var(--green-mid)">Vous</strong>
+                                @else
+                                    {{ \App\Models\Membre::find($tour->membre_id)->nom ?? '-' }} {{ \App\Models\Membre::find($tour->membre_id)->prenom ?? '' }}
+                                @endif
+                            </td>
+                            <td>{{ $tour->mode_reception ?? '—' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                @else
+                <div class="empty">Aucun tour programmé pour le moment.</div>
+                @endif
+            </div>
+        </div>
+    </div>
+    <!-- GESTION TONTINES (GÉRANT) -->
+    @if($tontinesGerees->count() > 0)
+    <div class="section" id="section-gestion">
+        @foreach($tontinesGerees as $tontine)
+        <div class="tontine-card">
+            <div class="tontine-header">
+                <div class="tontine-name">{{ $tontine->nom }}</div>
+                <span class="badge-admin"> Vous êtes gérant</span>
+            </div>
 
+            <!-- Ajouter un tour -->
+            <div class="tontine-section">
+                <div class="tontine-section-title">Ajouter un tour</div>
+                <form action="/tour" method="post" style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:flex-end;">
+                    @csrf
+                    <input type="hidden" name="tontine_id" value="{{ $tontine->id }}">
+                    <div class="form-group">
+                        <label class="form-label">Membre bénéficiaire</label>
+                        <select name="membre_id" class="form-control" required>
+                            <option value="">Choisir</option>
+                            @foreach($tontine->membres as $m)
+                            <option value="{{ $m->id }}">{{ $m->nom }} {{ $m->prenom }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" name="date_tour" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">État</label>
+                        <select name="etat" class="form-control">
+                            <option value="en_attente">En attente</option>
+                            <option value="terminer">Terminé</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </form>
+            </div>
+
+            <!-- Liste des tours -->
+            <div class="tontine-section">
+                <div class="tontine-section-title">Tours de cette tontine</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Date</th><th>Bénéficiaire</th><th>État</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            @foreach($tontine->tours as $tour)
+                            <tr>
+                                <td>{{ \Carbon\Carbon::parse($tour->date_tour)->format('d/m/Y') }}</td>
+                                <td>{{ $tour->membre->nom ?? '-' }} {{ $tour->membre->prenom ?? '' }}</td>
+                                <td><span class="badge {{ $tour->etat === 'terminer' ? 'badge-success' : 'badge-wave' }}">{{ $tour->etat === 'terminer' ? 'Terminé' : 'En attente' }}</span></td>
+                                <td>
+                                    <form action="/tour/{{ $tour->id }}" method="post" onsubmit="return confirm('Supprimer ce tour ?')" style="display:inline;">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-danger" style="padding:0.3rem 0.7rem;font-size:0.75rem;">Supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Ajouter une cotisation -->
+            <div class="tontine-section">
+                <div class="tontine-section-title">Ajouter une cotisation</div>
+                <form action="/cotisation" method="post" style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:flex-end;">
+                    @csrf
+                    <input type="hidden" name="tontine_id" value="{{ $tontine->id }}">
+                    <div class="form-group">
+                        <label class="form-label">Membre</label>
+                        <select name="membre_id" class="form-control" required>
+                            <option value="">Choisir</option>
+                            @foreach($tontine->membres as $m)
+                            <option value="{{ $m->id }}">{{ $m->nom }} {{ $m->prenom }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Montant</label>
+                        <input type="number" name="montant" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" name="date_cotisation" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </form>
+            </div>
+
+            <!-- Membres : retirer/remettre -->
+            <div class="tontine-section">
+                <div class="tontine-section-title">Membres de cette tontine</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Nom</th><th>Rôle</th><th>Action</th></tr></thead>
+                        <tbody>
+                            @foreach($tontine->membres as $m)
+                            <tr>
+                                <td>{{ $m->nom }} {{ $m->prenom }}</td>
+                                <td>{{ $m->pivot->role === 'admin' ? '⭐ Gérant' : 'Membre' }}</td>
+                                <td>
+                                    @if($m->pivot->role !== 'admin')
+                                    <form action="/tontine/{{ $tontine->id }}/membre/{{ $m->id }}" method="post" onsubmit="return confirm('Retirer ce membre ?')" style="display:inline;">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-danger" style="padding:0.3rem 0.7rem;font-size:0.75rem;">Retirer</button>
+                                    </form>
+                                    @else
+                                    <span style="font-size:0.78rem;color:var(--muted);">—</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Remettre un membre -->
+                <form action="/tontine/{{ $tontine->id }}/membre" method="post" style="margin-top:1rem;display:flex;gap:0.5rem;align-items:flex-end;">
+                    @csrf
+                    <div class="form-group">
+                        <label class="form-label">Ajouter un membre</label>
+                        <select name="membre_id" class="form-control" style="width:250px;" required>
+                            <option value="">Choisir un membre</option>
+                            @foreach($membres as $m)
+                            <option value="{{ $m->id }}">{{ $m->nom }} {{ $m->prenom }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </form>
+            </div>
+        </div>
+        @endforeach
+    </div>
+    @endif
     <!-- COTISATIONS -->
     <div class="section" id="section-cotisations">
         @if(session('success'))
@@ -359,16 +556,46 @@
     <!-- NOTIFICATIONS -->
     <div class="section" id="section-notifications">
         <div class="panel">
-            <div class="panel-header"><div class="panel-title">Mes notifications</div></div>
-            @if($membre->notifications->count() > 0)
-                @foreach($membre->notifications as $notif)
+           <div class="panel-header">
+                <div class="panel-title">Mes notifications</div>
+                @if($membre->notifications->count() > 0)
+                <div class="export-btns">
+                    <form action="/mon-espace/notifs/marquer-tout-lu" method="post">
+                        @csrf
+                        <button type="submit" class="btn btn-lu">Marquer tout lu</button>
+                    </form>
+                    <form action="/mon-espace/notifs/supprimer-tout" method="post" onsubmit="return confirm('Supprimer toutes les notifications ?')">
+                        @csrf
+                        <button type="submit" class="btn btn-pdf">Supprimer tout</button>
+                    </form>
+                </div>
+                @endif
+            </div>
+           @if($membre->notifications->count() > 0)
+            <form action="/mon-espace/notifs/supprimer-selection" method="post" id="formSelectionNotifs">
+                @csrf
+            @foreach($membre->notifications as $notif)
                 <div class="notif-item {{ !$notif->lu ? 'non-lu' : '' }}">
+                    <div style="display:flex;align-items:flex-start;gap:0.6rem;flex:1">
+                        <input type="checkbox" name="notif_ids[]" value="{{ $notif->id }}" style="margin-top:0.3rem;">
                     <div style="flex:1">
                         <div class="notif-titre">{{ $notif->titre }}</div>
                         <div class="notif-msg">{{ $notif->message }}</div>
                         <div class="notif-date">{{ \Carbon\Carbon::parse($notif->created_at)->locale('fr')->diffForHumans() }}</div>
-                    </div>
-                    @if(!$notif->lu)
+
+                        @if($notif->titre === 'Vous êtes bénéficiaire !')
+                            @php
+                                $tourEnAttente = $membre->tours()->where('etat', 'en_attente')->whereNull('mode_reception')->latest('date_tour')->first();
+                            @endphp
+                            @if($tourEnAttente)
+                            <form action="/tour/{{ $tourEnAttente->id }}/mode-reception" method="post" style="margin-top:0.8rem;display:flex;gap:0.5rem;">
+                                @csrf
+                                <button type="submit" name="mode_reception" value="presentiel" class="btn btn-primary" style="font-size:0.75rem;">Présentiel</button>
+                                <button type="submit" name="mode_reception" value="operateur" class="btn btn-secondary" style="font-size:0.75rem;">Par opérateur</button>
+                            </form>
+                            @endif
+                        @endif
+                  @if(!$notif->lu)
                     <div style="display:flex;align-items:center;gap:0.5rem">
                         <div class="notif-dot"></div>
                         <form action="/mon-espace/notif/{{ $notif->id }}/lu" method="post">
@@ -377,8 +604,13 @@
                         </form>
                     </div>
                     @endif
+                    </div>
                 </div>
-                @endforeach
+               @endforeach
+                <div style="padding:1rem 1.5rem;">
+                    <button type="submit" class="btn btn-pdf">Supprimer la sélection</button>
+                </div>
+            </form>
             @else
             <div class="empty">Aucune notification pour le moment.</div>
             @endif
@@ -548,32 +780,38 @@
 <script>
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-    const titles = {
+     const titles = {
         accueil: 'Mon <span>espace</span>',
         tontines: 'Mes <span>tontines</span>',
+        tours: 'Mes <span>tours</span>',
         cotisations: 'Mes <span>cotisations</span>',
         notifications: 'Mes <span>notifications</span>',
         membres: 'Les <span>membres</span>',
         contact: 'Contacter l\'<span>admin</span>',
         securite: 'Ma <span>sécurité</span>',
+        gestion: 'Gérer mes <span>tontines</span>',
     };
-
-    function showSection(name, btn) {
+   function showSection(name, btn) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('section-' + name).classList.add('active');
+        const section = document.getElementById('section-' + name);
+        if (section) section.classList.add('active');
+        if (!btn) {
+            document.querySelectorAll('.nav-item').forEach(n => {
+                const onclickAttr = n.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes("'" + name + "'")) {
+                    btn = n;
+                }
+            });
+        }
         if (btn) btn.classList.add('active');
         document.getElementById('pageTitle').innerHTML = titles[name] || name;
     }
-
-    @if($errors->has('ancien_password'))
-        showSection('securite', document.querySelectorAll('.nav-item')[6]);
+    @if(session('section'))
+        showSection('{{ session('section') }}', null);
     @endif
-    @if(session('success') && request()->is('*changer*'))
-        showSection('securite', document.querySelectorAll('.nav-item')[6]);
-    @endif
-    @if(session('success') && !request()->is('*changer*'))
-        showSection('cotisations', document.querySelectorAll('.nav-item')[2]);
+ @if(session('section'))
+        showSection('{{ session('section') }}', null);
     @endif
 
     function ouvrirModalPaiement() {

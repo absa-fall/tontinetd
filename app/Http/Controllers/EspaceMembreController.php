@@ -25,20 +25,24 @@ class EspaceMembreController extends Controller
             'notifications'
         ])->find($id);
     }
-
-    public function index()
+public function index()
     {
         $membre = $this->getMembre();
         if (!$membre) return redirect('/login');
         
         $membres = Membre::all();
        
-$admin = Membre::whereHas('tontines', function($q) {
-    $q->where('membre_tontine.role', 'admin');
-})->first();
-        return view('espace-membre', compact('membre', 'membres', 'admin'));
-    }
+        $admin = Membre::whereHas('tontines', function($q) {
+            $q->where('membre_tontine.role', 'admin');
+        })->first();
 
+        // Tontines où ce membre est gérant
+        $tontinesGerees = $membre->tontines->filter(function($t) {
+            return $t->pivot->role === 'admin';
+        });
+
+        return view('espace-membre', compact('membre', 'membres', 'admin', 'tontinesGerees'));
+    }
     public function ajouterCotisation(Request $request)
     {
         $membre = $this->getMembre();
@@ -62,15 +66,40 @@ $admin = Membre::whereHas('tontines', function($q) {
         return back()->with('success', 'Cotisation ajoutée avec succès !');
     }
 
-    public function marquerLu($id)
+   public function marquerLu($id)
     {
         $notif = NotificationMembre::find($id);
         if ($notif && $notif->membre_id === Session::get('membre_id')) {
             $notif->update(['lu' => true]);
         }
-        return back();
+        return back()->with('section', 'notifications');
+    }
+    public function marquerToutLu()
+    {
+        NotificationMembre::where('membre_id', Session::get('membre_id'))
+            ->where('lu', false)
+            ->update(['lu' => true]);
+
+        return back()->with('section', 'notifications');
     }
 
+    public function supprimerToutNotifs()
+    {
+        NotificationMembre::where('membre_id', Session::get('membre_id'))->delete();
+
+        return back()->with('section', 'notifications');
+    }
+
+    public function supprimerSelectionNotifs(Request $request)
+    {
+        $ids = $request->input('notif_ids', []);
+
+        NotificationMembre::where('membre_id', Session::get('membre_id'))
+            ->whereIn('id', $ids)
+            ->delete();
+
+        return back()->with('section', 'notifications');
+    }
     public function exportPdf()
     {
         $membre = $this->getMembre();

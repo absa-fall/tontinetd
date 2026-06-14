@@ -9,6 +9,7 @@ use App\Http\Controllers\ControlleurTour;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\EspaceMembreController;
 use App\Http\Controllers\AdminExportController;
+use App\Http\Controllers\GerantController;
 
 // -----------------------------------------------
 // LANDING PAGE
@@ -39,12 +40,11 @@ Route::get('/dashboard', function () {
     $membres             = \App\Models\Membre::all();
     $tontines            = \App\Models\Tontine::with('membres')->get();
     $cotisations         = \App\Models\Cotisation::all();
-    $tours               = \App\Models\Tour::all();
+    $tours               = \App\Models\Tour::with(['tontine', 'membre'])->get();
     $membresEnAttente    = \App\Models\Membre::where('statut', 'en_attente')->get();
     $notifsAdmin         = \App\Models\NotificationAdmin::with('membre')->orderBy('created_at', 'desc')->get();
     return view('dashboard', compact('membres', 'tontines', 'cotisations', 'tours', 'membresEnAttente', 'notifsAdmin'));
 });
-
 // -----------------------------------------------
 // MEMBRES
 // -----------------------------------------------
@@ -78,7 +78,7 @@ Route::get('/tours', [ControlleurTour::class, 'index']);
 Route::post('/tour', [ControlleurTour::class, 'store']);
 Route::put('/tour/{id}', [ControlleurTour::class, 'update']);
 Route::delete('/tour/{id}', [ControlleurTour::class, 'destroy']);
-
+Route::post('/tour/{id}/mode-reception', [ControlleurTour::class, 'choisirModeReception']);
 // -----------------------------------------------
 // ESPACE MEMBRE
 // -----------------------------------------------
@@ -87,29 +87,31 @@ Route::post('/mon-espace/cotisation', [EspaceMembreController::class, 'ajouterCo
 Route::get('/mon-espace/export/pdf', [EspaceMembreController::class, 'exportPdf']);
 Route::get('/mon-espace/export/excel', [EspaceMembreController::class, 'exportExcel']);
 Route::post('/mon-espace/notif/{id}/lu', [EspaceMembreController::class, 'marquerLu']);
+Route::post('/mon-espace/notifs/marquer-tout-lu', [EspaceMembreController::class, 'marquerToutLu']);
+Route::post('/mon-espace/notifs/supprimer-tout', [EspaceMembreController::class, 'supprimerToutNotifs']);
+Route::post('/mon-espace/notifs/supprimer-selection', [EspaceMembreController::class, 'supprimerSelectionNotifs']);
 
-// -----------------------------------------------
-// EXPORTS ADMIN
-// -----------------------------------------------
 Route::get('/admin/export/pdf/{id}', [AdminExportController::class, 'pdfMembre']);
 Route::get('/admin/export/excel/{id}', [AdminExportController::class, 'excelMembre']);
 Route::get('/admin/export/global/pdf', [AdminExportController::class, 'pdfGlobal']);
 Route::post('/admin/notifier-tour/{tourId}', [AdminExportController::class, 'notifierTour']);
 Route::get('/admin/membre/{id}', [ControlleurMembre::class, 'show']);
 
-
-// -----------------------------------------------
-// APPROUVER / REFUSER MEMBRES
-// -----------------------------------------------
 Route::post('/admin/membre/{id}/approuver', [AdminExportController::class, 'approuverMembre']);
 Route::post('/admin/membre/{id}/refuser', [AdminExportController::class, 'refuserMembre']);
-// Approuver / Refuser tout
 Route::post('/admin/membres/approuver-tout', [AdminExportController::class, 'approuverTout']);
 Route::post('/admin/membres/refuser-tout', [AdminExportController::class, 'refuserTout']);
-
-// Rendre admin d'une tontine
-Route::post('/admin/tontine/{tontineId}/membre/{membreId}/rendre-admin', [AdminExportController::class, 'rendreAdmin']);
-
-// Notifications admin
 Route::post('/admin/notifs/marquer-tout-lu', [AdminExportController::class, 'marquerToutLu']);
 Route::post('/admin/notifs/supprimer-tout', [AdminExportController::class, 'supprimerToutNotifs']);
+
+// Rôles
+Route::post('/admin/membre/{id}/rendre-admin', [AdminExportController::class, 'rendreAdmin']);
+Route::post('/admin/membre/{id}/rendre-gerant', [AdminExportController::class, 'rendreGerant']);
+Route::post('/admin/membre/{id}/retirer-role', [AdminExportController::class, 'retirerRole']);
+Route::post('/admin/tontine/{tontineId}/membre/{membreId}/rendre-admin', [AdminExportController::class, 'rendreAdminTontine']);
+
+// Activer / Désactiver
+Route::post('/admin/membre/{id}/activer', [AdminExportController::class, 'activer']);
+Route::post('/admin/membre/{id}/desactiver', [AdminExportController::class, 'desactiver']);
+
+Route::get('/gerant', [GerantController::class, 'index']);

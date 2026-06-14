@@ -35,6 +35,7 @@ class LoginController extends Controller
         if ($request->email === 'admin@tontinetd.sn' && $request->password === 'TontineTD@2026') {
             Session::forget(['membre_id', 'membre_nom']);
             Session::put('is_admin', true);
+            Session::put('role', 'super_admin');
             return redirect('/dashboard');
         }
 
@@ -53,17 +54,21 @@ class LoginController extends Controller
         if ($membre->statut === 'refuse') {
             return back()->withErrors(['email' => 'Votre compte a été refusé. Contactez l\'administrateur.']);
         }
-
-        Session::put('membre_id', $membre->id);
+Session::put('membre_id', $membre->id);
+       Session::put('membre_id', $membre->id);
         Session::put('membre_nom', $membre->nom . ' ' . $membre->prenom);
         Session::put('is_admin', false);
+        Session::put('role', $membre->role);
+
+        if (in_array($membre->role, ['gerant', 'admin'])) {
+            return redirect('/gerant');
+        }
 
         return redirect('/mon-espace');
     }
 
     // -----------------------------------------------
     // INSCRIPTION
-    // -----------------------------------------------
     public function showRegister()
     {
         Session::forget(['membre_id', 'membre_nom', 'is_admin']);

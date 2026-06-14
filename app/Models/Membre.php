@@ -6,20 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class Membre extends Model
 {
-    protected $fillable = [
-        'nom',
-        'prenom',
-        'email',
-        'password',
-        'adresse',
-        'telephone',
-        'date_naissance',
-        'statut',
-    ];
+   protected $fillable = [
+    'nom',
+    'prenom',
+    'email',
+    'password',
+    'adresse',
+    'telephone',
+    'date_naissance',
+    'statut',
+    'role',
+];
 
     public function cotisations()
     {
         return $this->hasMany(Cotisation::class);
+    }
+    public function tours()
+    {
+        return $this->hasMany(Tour::class);
     }
 
     public function notifications()
@@ -42,5 +47,15 @@ class Membre extends Model
         return $this->belongsToMany(Tontine::class, 'membre_tontine')
                     ->withPivot('role')
                     ->withTimestamps();
+    }
+
+    public function isGerant()
+    {
+        return $this->role === 'gerant';
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
     }
 }

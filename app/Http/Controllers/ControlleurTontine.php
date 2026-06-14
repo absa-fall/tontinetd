@@ -66,12 +66,12 @@ class ControlleurTontine extends Controller
     }
 
     public function destroy($id)
-    {
-        $tontine = Tontine::findOrFail($tontineId);
-        $tontine->delete();
+{
+    $tontine = Tontine::findOrFail($id); // ← était $tontineId
+    $tontine->delete();
 
-        return redirect('/dashboard')->with('success', 'Tontine supprimée avec succès !')->with('section', 'tontines');
-    }
+    return redirect('/dashboard')->with('success', 'Tontine supprimée avec succès !')->with('section', 'tontines');
+}
 
     public function ajouterMembre(Request $request, $tontineId)
     {
