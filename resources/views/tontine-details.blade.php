@@ -25,7 +25,7 @@
         .stat-value { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; }
 
         .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; }
-        .panel-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); background: #fafcfa; }
+        .panel-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); background: #fafcfa; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .panel-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; }
 
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
@@ -41,6 +41,27 @@
         .badge-admin { background: var(--success-light); color: var(--success); border: 1px solid rgba(26,102,69,0.2); padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
 
         .empty { padding: 2rem; text-align: center; color: var(--muted); font-size: 0.9rem; }
+
+        /* ✅ Ajouts pour la fonctionnalité d'ajout de membre */
+        .alert { padding: 0.9rem 1.2rem; border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 500; }
+        .alert-success { background: var(--success-light); color: var(--green-mid); border: 1px solid rgba(26,102,69,0.2); }
+        .alert-error { background: rgba(220,53,69,0.08); color: #c0392b; border: 1px solid rgba(220,53,69,0.2); }
+
+        .form-ajout-membre { display: flex; gap: 0.6rem; }
+        .form-ajout-membre select {
+            padding: 0.5rem 0.8rem; border: 1px solid var(--border); border-radius: 8px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--text); background: var(--white); min-width: 220px;
+        }
+        .btn-add {
+            padding: 0.5rem 1.2rem; border: none; border-radius: 8px; background: var(--green-mid);
+            color: var(--white); font-weight: 600; font-size: 0.85rem; cursor: pointer; font-family: inherit;
+        }
+        .btn-add:hover { background: var(--green-dark); }
+
+        .btn-retirer {
+            border: none; background: none; color: #c0392b; cursor: pointer; font-size: 0.78rem;
+            font-weight: 600; font-family: inherit; padding: 0; text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -49,6 +70,14 @@
         <div class="title">{{ $tontine->nom }} — <span>Détails</span></div>
         <a href="javascript:history.back()" class="btn-back">Retour</a>
     </div>
+
+    {{-- ✅ Messages de retour --}}
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-error">{{ session('error') }}</div>
+    @endif
 
     <div class="stats-grid">
         <div class="stat-card">
@@ -70,10 +99,27 @@
     </div>
 
     <div class="panel">
-        <div class="panel-header"><div class="panel-title">Membres</div></div>
+        <div class="panel-header">
+            <div class="panel-title">Membres</div>
+
+            {{-- ✅ Formulaire d'ajout de membre (gérant + super admin) --}}
+            @if($membresDisponibles->count() > 0)
+            <form action="{{ url('/tontine/'.$tontine->id.'/membre') }}" method="POST" class="form-ajout-membre">
+                @csrf
+                <select name="membre_id" required>
+                    <option value="">-- Choisir un membre --</option>
+                    @foreach($membresDisponibles as $m)
+                        <option value="{{ $m->id }}">{{ $m->nom }} {{ $m->prenom }}</option>
+                    @endforeach
+                </select>
+                <button type="submit" class="btn-add">Ajouter</button>
+            </form>
+            @endif
+        </div>
+
         @if($tontine->membres->count() > 0)
         <table>
-            <thead><tr><th>Nom</th><th>Prénom</th><th>Email</th><th>Rôle</th></tr></thead>
+            <thead><tr><th>Nom</th><th>Prénom</th><th>Email</th><th>Rôle</th><th>Action</th></tr></thead>
             <tbody>
                 @foreach($tontine->membres as $m)
                 <tr>
@@ -85,6 +131,15 @@
                             <span class="badge-admin">Gérant</span>
                         @else
                             <span class="badge badge-yellow">Membre</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($m->pivot->role !== 'admin')
+                        <form action="{{ url('/tontine/'.$tontine->id.'/membre/'.$m->id) }}" method="POST" onsubmit="return confirm('Retirer ce membre de la tontine ?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn-retirer">Retirer</button>
+                        </form>
                         @endif
                     </td>
                 </tr>

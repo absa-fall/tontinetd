@@ -251,19 +251,53 @@
                     <div class="tontine-section-title">Tours ({{ $tontine->tours->count() }})</div>
                     @if($tontine->tours->count() > 0)
                         @foreach($tontine->tours as $tour)
-                        <div class="tour-item">
-                            <span>Tour du {{ \Carbon\Carbon::parse($tour->date_tour)->format('d/m/Y') }}</span>
-                            @if($tour->etat === 'termine')
-                                <span class="badge-success">Terminé</span>
-                            @else
-                                <span class="badge-wave">En attente</span>
-                            @endif
-                        </div>
+                     <div class="tour-item">
+    <span>Tour du {{ \Carbon\Carbon::parse($tour->date_tour)->format('d/m/Y') }}</span>
+    <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+        @if($tour->etat === 'termine')
+            <span class="badge-success">Terminé</span>
+        @else
+            <span class="badge-wave">En attente</span>
+        @endif
+
+        @if($tour->membre_id === $membre->id)
+            @php $joursRestants = \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($tour->date_tour), false); @endphp
+            @if($tour->mode_reception)
+                <span style="background:var(--success-light);color:var(--green-mid);border:1px solid rgba(26,102,69,0.2);padding:0.2rem 0.7rem;border-radius:999px;font-size:0.72rem;font-weight:600;">
+                    {{ $tour->mode_reception === 'presentiel' ? 'Présentiel' : 'Via opérateur' }}
+                </span>
+                @if($joursRestants >= 0 && $joursRestants <= 3)
+                <form action="/tour/{{ $tour->id }}/mode-reception" method="post" style="display:flex;gap:0.4rem;">
+                    @csrf
+                    <button type="submit" name="mode_reception" value="presentiel" class="btn btn-secondary" style="padding:0.2rem 0.6rem;font-size:0.75rem;">Présentiel</button>
+                    <button type="submit" name="mode_reception" value="operateur" class="btn btn-primary" style="padding:0.2rem 0.6rem;font-size:0.75rem;">Via opérateur</button>
+                </form>
+                @endif
+            @else
+                @if($joursRestants >= 0)
+                <form action="/tour/{{ $tour->id }}/mode-reception" method="post" style="display:flex;gap:0.4rem;">
+                    @csrf
+                    <button type="submit" name="mode_reception" value="presentiel" class="btn btn-secondary" style="padding:0.2rem 0.6rem;font-size:0.75rem;">Présentiel</button>
+                    <button type="submit" name="mode_reception" value="operateur" class="btn btn-primary" style="padding:0.2rem 0.6rem;font-size:0.75rem;">Via opérateur</button>
+                </form>
+                @else
+                <span style="font-size:0.78rem;color:var(--muted);">Tour passé</span>
+                @endif
+            @endif
+<form action="/tour/{{ $tour->id }}" method="post" onsubmit="return confirm('Supprimer ce tour ?')" style="display:inline;">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger" style="padding:0.2rem 0.6rem;font-size:0.75rem;">Supprimer</button>
+            </form>
+        @endif
+    </div>
+</div>
                         @endforeach
                     @else
                         <div style="font-size: 0.85rem; color: var(--muted);">Aucun tour pour le moment.</div>
                     @endif
                 </div>
+                
                 <div class="tontine-section">
                     <div class="tontine-section-title">Membres ({{ $tontine->membres->count() }})</div>
                     <div>
@@ -553,69 +587,100 @@
         </div>
     </div>
 
-    <!-- NOTIFICATIONS -->
-    <div class="section" id="section-notifications">
-        <div class="panel">
-           <div class="panel-header">
-                <div class="panel-title">Mes notifications</div>
-                @if($membre->notifications->count() > 0)
-                <div class="export-btns">
-                    <form action="/mon-espace/notifs/marquer-tout-lu" method="post">
-                        @csrf
-                        <button type="submit" class="btn btn-lu">Marquer tout lu</button>
-                    </form>
-                    <form action="/mon-espace/notifs/supprimer-tout" method="post" onsubmit="return confirm('Supprimer toutes les notifications ?')">
-                        @csrf
-                        <button type="submit" class="btn btn-pdf">Supprimer tout</button>
-                    </form>
-                </div>
-                @endif
+   <!-- NOTIFICATIONS -->
+<div class="section" id="section-notifications">
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">Mes notifications</div>
+            @if($membre->notifications->count() > 0)
+            <div class="export-btns">
+                <form action="/mon-espace/notifs/marquer-tout-lu" method="post">
+                    @csrf
+                    <button type="submit" class="btn btn-lu">Marquer tout lu</button>
+                </form>
+                <form action="/mon-espace/notifs/supprimer-tout" method="post" onsubmit="return confirm('Supprimer toutes les notifications ?')">
+                    @csrf
+                    <button type="submit" class="btn btn-pdf">Supprimer tout</button>
+                </form>
             </div>
-           @if($membre->notifications->count() > 0)
-            <form action="/mon-espace/notifs/supprimer-selection" method="post" id="formSelectionNotifs">
-                @csrf
-            @foreach($membre->notifications as $notif)
-                <div class="notif-item {{ !$notif->lu ? 'non-lu' : '' }}">
-                    <div style="display:flex;align-items:flex-start;gap:0.6rem;flex:1">
-                        <input type="checkbox" name="notif_ids[]" value="{{ $notif->id }}" style="margin-top:0.3rem;">
-                    <div style="flex:1">
-                        <div class="notif-titre">{{ $notif->titre }}</div>
-                        <div class="notif-msg">{{ $notif->message }}</div>
-                        <div class="notif-date">{{ \Carbon\Carbon::parse($notif->created_at)->locale('fr')->diffForHumans() }}</div>
-
-                        @if($notif->titre === 'Vous êtes bénéficiaire !')
-                            @php
-                                $tourEnAttente = $membre->tours()->where('etat', 'en_attente')->whereNull('mode_reception')->latest('date_tour')->first();
-                            @endphp
-                            @if($tourEnAttente)
-                            <form action="/tour/{{ $tourEnAttente->id }}/mode-reception" method="post" style="margin-top:0.8rem;display:flex;gap:0.5rem;">
-                                @csrf
-                                <button type="submit" name="mode_reception" value="presentiel" class="btn btn-primary" style="font-size:0.75rem;">Présentiel</button>
-                                <button type="submit" name="mode_reception" value="operateur" class="btn btn-secondary" style="font-size:0.75rem;">Par opérateur</button>
-                            </form>
-                            @endif
-                        @endif
-                  @if(!$notif->lu)
-                    <div style="display:flex;align-items:center;gap:0.5rem">
-                        <div class="notif-dot"></div>
-                        <form action="/mon-espace/notif/{{ $notif->id }}/lu" method="post">
-                            @csrf
-                            <button type="submit" class="btn btn-lu">Marquer lu</button>
-                        </form>
-                    </div>
-                    @endif
-                    </div>
-                </div>
-               @endforeach
-                <div style="padding:1rem 1.5rem;">
-                    <button type="submit" class="btn btn-pdf">Supprimer la sélection</button>
-                </div>
-            </form>
-            @else
-            <div class="empty">Aucune notification pour le moment.</div>
             @endif
         </div>
+
+        @if($membre->notifications->count() > 0)
+        <form action="/mon-espace/notifs/supprimer-selection" method="post" id="formSelectionNotifs">
+            @csrf
+            <div style="padding:1.5rem;">
+                <div style="position:relative;padding-left:2rem;">
+                    {{-- Ligne verticale --}}
+                    <div style="position:absolute;left:7px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom, var(--gold), var(--green-mid));border-radius:2px;"></div>
+
+                    @foreach($membre->notifications as $notif)
+                    <div style="position:relative;margin-bottom:1.5rem;">
+                        {{-- Point sur la ligne --}}
+                        <div style="position:absolute;left:-2rem;top:0.3rem;width:14px;height:14px;border-radius:50%;background:{{ !$notif->lu ? 'var(--gold)' : 'var(--green-mid)' }};border:2px solid var(--surface);box-shadow:0 0 0 2px {{ !$notif->lu ? 'var(--gold)' : 'var(--green-mid)' }};"></div>
+
+                        {{-- Carte notification --}}
+                        <div style="background:{{ !$notif->lu ? 'rgba(240,165,0,0.05)' : 'var(--bg)' }};border:1.5px solid {{ !$notif->lu ? 'rgba(240,165,0,0.3)' : 'var(--border)' }};border-radius:12px;padding:1rem 1.2rem;">
+                            
+                            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+                                <div style="display:flex;align-items:center;gap:0.5rem;">
+                                    <input type="checkbox" name="notif_ids[]" value="{{ $notif->id }}" style="accent-color:var(--green-mid);">
+                                    <div>
+                                        <div style="font-weight:600;font-size:0.9rem;color:var(--text);">{{ $notif->titre }}</div>
+                                        <div style="font-size:0.75rem;color:var(--muted);margin-top:0.1rem;">{{ \Carbon\Carbon::parse($notif->created_at)->locale('fr')->diffForHumans() }}</div>
+                                    </div>
+                                </div>
+                                @if(!$notif->lu)
+                                <span style="background:rgba(240,165,0,0.15);color:#b07800;font-size:0.7rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:999px;white-space:nowrap;">Nouveau</span>
+                                @endif
+                            </div>
+
+                            <div style="font-size:0.88rem;color:var(--text);margin-top:0.6rem;line-height:1.5;">{{ $notif->message }}</div>
+
+                           {{-- Boutons mode réception --}}
+                            @if($notif->titre === 'Vous êtes bénéficiaire !')
+                                @php
+                                    $tourEnAttente = $membre->tours()->where('etat', 'en_attente')->latest('date_tour')->first();
+                                    $peutModifier = $tourEnAttente && now()->lessThan(\Carbon\Carbon::parse($tourEnAttente->date_tour)->subDays(3));
+                                @endphp
+                                @if($tourEnAttente && $peutModifier)
+                                <form action="/tour/{{ $tourEnAttente->id }}/mode-reception" method="post" style="margin-top:0.8rem;display:flex;gap:0.5rem;">
+                                    @csrf
+                                    <button type="submit" name="mode_reception" value="presentiel" class="btn btn-primary" style="font-size:0.75rem;">Présentiel</button>
+                                    <button type="submit" name="mode_reception" value="operateur" class="btn btn-secondary" style="font-size:0.75rem;">Par opérateur</button>
+                                </form>
+                                @if($tourEnAttente->mode_reception)
+                                <div style="font-size:0.75rem;color:var(--muted);margin-top:0.3rem;">Mode actuel : {{ $tourEnAttente->mode_reception === 'presentiel' ? 'Présentiel' : 'Via opérateur' }}</div>
+                                @endif
+                                @elseif($tourEnAttente && $tourEnAttente->mode_reception)
+                                <div style="font-size:0.75rem;color:var(--muted);margin-top:0.3rem;">Mode de réception : {{ $tourEnAttente->mode_reception === 'presentiel' ? 'Présentiel' : 'Via opérateur' }} (modification fermée, moins de 3 jours)</div>
+                                @endif
+                            @endif
+
+                            {{-- Marquer lu --}}
+                            @if(!$notif->lu)
+                            <div style="margin-top:0.8rem;">
+                                <form action="/mon-espace/notif/{{ $notif->id }}/lu" method="post">
+                                    @csrf
+                                    <button type="submit" class="btn btn-lu" style="font-size:0.75rem;">Marquer lu</button>
+                                </form>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+
+                <div style="margin-top:0.5rem;">
+                    <button type="submit" class="btn btn-pdf" onclick="return confirm('Supprimer la sélection ?')">Supprimer la sélection</button>
+                </div>
+            </div>
+        </form>
+        @else
+        <div class="empty">Aucune notification pour le moment.</div>
+        @endif
     </div>
+</div>
 
     <!-- MEMBRES -->
     <div class="section" id="section-membres">
@@ -666,7 +731,7 @@
                 </div>
 
                 <a href="mailto:{{ $admin->email }}" class="contact-item">
-                    <div class="contact-icon" style="background:var(--success-light);color:var(--green-mid);">✉</div>
+                    <div class="contact-icon" style="background:var(--success-light);color:var(--green-mid);" > </div>
                     <div>
                         <div class="contact-label">Email</div>
                         <div class="contact-value">{{ $admin->email }}</div>
@@ -674,7 +739,7 @@
                 </a>
 
                 <a href="tel:{{ $admin->telephone }}" class="contact-item">
-                    <div class="contact-icon" style="background:var(--wave-light);color:var(--wave);">📞</div>
+                    <div class="contact-icon" style="background:var(--wave-light);color:var(--wave);"> </div>
                     <div>
                         <div class="contact-label">Téléphone</div>
                         <div class="contact-value">{{ $admin->telephone }}</div>
@@ -682,15 +747,29 @@
                 </a>
 
                 <a href="https://wa.me/{{ preg_replace('/\s+/', '', $admin->telephone) }}" target="_blank" class="contact-item">
-                    <div class="contact-icon" style="background:#e8fdf2;color:#25d366;">💬</div>
+                    <div class="contact-icon" style="background:#e8fdf2;color:#25d366;"></div>
                     <div>
                         <div class="contact-label">WhatsApp</div>
                         <div class="contact-value">{{ $admin->telephone }}</div>
                     </div>
                 </a>
-                @else
-                <div class="empty">Aucun administrateur trouvé.</div>
-                @endif
+               @else
+{{-- Contact fixe du super admin --}}
+<div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border);margin-bottom:1.2rem;">
+    <div style="width:50px;height:50px;border-radius:50%;background:var(--success-light);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--green-mid);font-size:1.3rem;">A</div>
+    <div>
+        <div style="font-weight:700;font-size:1rem;">Administrateur TontineTD</div>
+        <div style="font-size:0.78rem;color:var(--muted);">Super Administrateur</div>
+    </div>
+</div>
+<a href="mailto:admin@tontinetd.sn" class="contact-item">
+    <div class="contact-icon" style="background:var(--success-light);color:var(--green-mid);"></div>
+    <div>
+        <div class="contact-label">Email</div>
+        <div class="contact-value">admin@tontinetd.sn</div>
+    </div>
+</a>
+@endif
             </div>
         </div>
     </div>

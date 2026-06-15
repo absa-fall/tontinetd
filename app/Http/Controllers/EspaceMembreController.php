@@ -32,10 +32,9 @@ public function index()
         
         $membres = Membre::all();
        
-        $admin = Membre::whereHas('tontines', function($q) {
-            $q->where('membre_tontine.role', 'admin');
-        })->first();
-
+       $admin = Membre::where('role', 'gerant')
+    ->orWhere('role', 'admin')
+    ->first();
         // Tontines où ce membre est gérant
         $tontinesGerees = $membre->tontines->filter(function($t) {
             return $t->pivot->role === 'admin';

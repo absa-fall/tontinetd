@@ -60,7 +60,7 @@ class ControlleurMembre extends Controller
             ]);
         }
 
-        return $this->redirectRole($nouveau->prenom . ' a ete ajoute avec succes !', 'membres');
+       return back()->with('success', 'Membre ajouté avec succès ! Mot de passe par défaut : password123 (le membre peut le modifier dans Sécurité après connexion).')->with('section', 'membres');
     }
 
     public function update(Request $request, $id)
@@ -101,4 +101,18 @@ class ControlleurMembre extends Controller
         $membre = Membre::with(['cotisations', 'tontines', 'notifications'])->findOrFail($id);
         return view('membres.show', compact('membre'));
     }
+    public function supprimerSelection(Request $request)
+{
+    $ids = $request->input('membre_ids', []);
+    Membre::whereIn('id', $ids)->delete();
+
+    return $this->redirectRole('Membres supprimés avec succès !', 'membres');
+}
+
+public function supprimerTout()
+{
+    Membre::where('role', 'membre')->delete();
+
+    return $this->redirectRole('Tous les membres ont été supprimés !', 'membres');
+}
 }

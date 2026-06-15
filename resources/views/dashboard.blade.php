@@ -37,6 +37,11 @@
         .page-title span { color: var(--green-mid); }
         .badge-date { background: var(--surface); border: 1px solid var(--border); padding: 0.45rem 1rem; border-radius: 999px; font-size: 0.8rem; color: var(--muted); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
 
+        /* Cloche */
+        .cloche-wrapper { position: relative; cursor: pointer; }
+        .cloche-btn { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text); position: relative; }
+        .cloche-count { position: absolute; top: -6px; right: -8px; background: var(--danger); color: #fff; border-radius: 999px; font-size: 0.6rem; padding: 1px 5px; font-weight: 700; min-width: 16px; text-align: center; }
+
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
         .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem 1.5rem; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: relative; overflow: hidden; cursor: pointer; }
         .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--border); }
@@ -132,7 +137,7 @@
         @endif
     </button>
     <button class="nav-item" onclick="showSection('membres', this)">Membres</button>
-   <button class="nav-item" onclick="showSection('tontines', this)">Tontines</button>
+    <button class="nav-item" onclick="showSection('tontines', this)">Tontines</button>
     <button class="nav-item" onclick="showSection('tours', this)">Tours</button>
     <button class="nav-item" onclick="showSection('cotisations', this)">Cotisations</button>
     <div class="sidebar-footer">
@@ -147,7 +152,17 @@
 <main class="main">
     <div class="topbar">
         <div class="page-title" id="pageTitle">Tableau de <span>bord</span></div>
-        <div class="badge-date" id="currentDate"></div>
+        <div style="display:flex;align-items:center;gap:1rem;">
+            <div class="badge-date" id="currentDate"></div>
+            <div class="cloche-wrapper">
+                <button class="cloche-btn" onclick="goToSection('inscriptions')" title="Notifications">
+                    🔔
+                    @if(isset($membresEnAttente) && $membresEnAttente->count() > 0)
+                    <span class="cloche-count">{{ $membresEnAttente->count() }}</span>
+                    @endif
+                </button>
+            </div>
+        </div>
     </div>
 
     @if(session('success'))
@@ -166,7 +181,7 @@
             <div class="stat-label">Tontines</div>
             <div class="stat-value">{{ count($tontines) }}</div>
         </div>
-        <div class="stat-card" onclick="showSection('cotisations', document.querySelectorAll('.nav-item')[4])">
+        <div class="stat-card" onclick="showSection('cotisations', document.querySelectorAll('.nav-item')[5])">
             <div class="stat-label">Cotisations</div>
             <div class="stat-value">{{ count($cotisations) }}</div>
         </div>
@@ -186,11 +201,11 @@
                     <span class="badge badge-yellow">{{ $notifsAdmin->where('lu', false)->count() }} non lue(s)</span>
                     <form action="/admin/notifs/marquer-tout-lu" method="post">
                         @csrf
-                        <button type="submit" class="btn btn-edit">✓ Tout marquer lu</button>
+                        <button type="submit" class="btn btn-edit">Tout marquer lu</button>
                     </form>
                     <form action="/admin/notifs/supprimer-tout" method="post" onsubmit="return confirm('Supprimer toutes les notifications ?')">
                         @csrf
-                        <button type="submit" class="btn btn-danger">🗑 Tout supprimer</button>
+                        <button type="submit" class="btn btn-danger">Tout supprimer</button>
                     </form>
                 </div>
             </div>
@@ -219,7 +234,7 @@
                     </form>
                     <form action="/admin/membres/refuser-tout" method="post" onsubmit="return confirm('Refuser tous ?')">
                         @csrf
-                        <button type="submit" class="btn btn-danger"> Refuser tout</button>
+                        <button type="submit" class="btn btn-danger">Refuser tout</button>
                     </form>
                     @endif
                 </div>
@@ -228,9 +243,7 @@
                 @if(isset($membresEnAttente) && $membresEnAttente->count() > 0)
                 <table>
                     <thead>
-                        <tr>
-                            <th>#</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Inscrit le</th><th>Actions</th>
-                        </tr>
+                        <tr><th>#</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Inscrit le</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
                         @foreach($membresEnAttente as $m)
@@ -245,11 +258,11 @@
                                 <div class="actions">
                                     <form action="/admin/membre/{{ $m->id }}/approuver" method="post" onsubmit="return confirm('Approuver {{ $m->prenom }} ?')">
                                         @csrf
-                                        <button type="submit" class="btn btn-profil"> Approuver</button>
+                                        <button type="submit" class="btn btn-profil">Approuver</button>
                                     </form>
                                     <form action="/admin/membre/{{ $m->id }}/refuser" method="post" onsubmit="return confirm('Refuser {{ $m->prenom }} ?')">
                                         @csrf
-                                        <button type="submit" class="btn btn-danger"> Refuser</button>
+                                        <button type="submit" class="btn btn-danger">Refuser</button>
                                     </form>
                                 </div>
                             </td>
@@ -258,7 +271,7 @@
                     </tbody>
                 </table>
                 @else
-                <div class="empty">✅ Aucune inscription en attente.</div>
+                <div class="empty">Aucune inscription en attente.</div>
                 @endif
             </div>
         </div>
@@ -320,19 +333,30 @@
             </div>
         </div>
         <div class="panel">
-            <div class="panel-header"><div class="panel-title">Liste des membres</div></div>
+            <div class="panel-header">
+                <div class="panel-title">Liste des membres</div>
+                <div class="btn-group">
+                    <form action="/membres/supprimer-tout" method="post" onsubmit="return confirm('Supprimer tous les membres ?')">
+                        @csrf
+                        <button type="submit" class="btn btn-danger">Supprimer tout</button>
+                    </form>
+                </div>
+            </div>
             <div class="table-wrap">
+                <form action="/membres/supprimer-selection" method="post" id="formSelectionMembres">
+                    @csrf
                 <table>
-                   <thead><tr><th>ID</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Statut</th><th>Rôle</th><th>Actions</th></tr></thead>
+                    <thead><tr><th></th><th>ID</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Statut</th><th>Rôle</th><th>Actions</th></tr></thead>
                     <tbody>
                         @foreach($membres as $m)
                         <tr>
+                            <td><input type="checkbox" name="membre_ids[]" value="{{ $m->id }}"></td>
                             <td>#{{ $m->id }}</td>
                             <td>{{ $m->nom }}</td>
                             <td>{{ $m->prenom }}</td>
                             <td>{{ $m->email }}</td>
                             <td>{{ $m->telephone }}</td>
-                          <td>
+                            <td>
                                 @if($m->statut === 'approuve')
                                     <span class="badge badge-green">Approuvé</span>
                                 @elseif($m->statut === 'refuse')
@@ -368,6 +392,10 @@
                         @endforeach
                     </tbody>
                 </table>
+                <div style="padding:1rem 1.5rem;">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer les membres sélectionnés ?')">Supprimer la sélection</button>
+                </div>
+                </form>
             </div>
         </div>
     </div>
@@ -392,26 +420,49 @@
                                 <option value="journalier">Journalier</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label class="form-label">Membres bénéficiaires</label>
+                            <select name="membre_ids[]" class="form-control" required>
+                                <option value="">Choisir un membre</option>
+                                @foreach($membres as $m)
+                                <option value="{{ $m->id }}">{{ $m->prenom }} {{ $m->nom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     <div class="btn-row"><button type="submit" class="btn btn-primary">Créer</button></div>
                 </form>
             </div>
         </div>
         <div class="panel">
-            <div class="panel-header"><div class="panel-title">Liste des tontines</div></div>
+            <div class="panel-header">
+                <div class="panel-title">Liste des tontines</div>
+                <div class="btn-group">
+                    <form action="/tontines/supprimer-tout" method="post" onsubmit="return confirm('Supprimer toutes les tontines ?')">
+                        @csrf
+                        <button type="submit" class="btn btn-danger">Supprimer tout</button>
+                    </form>
+                </div>
+            </div>
             <div class="table-wrap">
+                <form action="/tontines/supprimer-selection" method="post" id="formSelectionTontines">
+                    @csrf
                 <table>
-                    <thead><tr><th>ID</th><th>Nom</th><th>Description</th><th>Montant</th><th>Début</th><th>Fin</th><th>Fréquence</th><th>Membres</th><th>Actions</th></tr></thead>
+                    <thead><tr><th></th><th>ID</th><th>Nom</th><th>Description</th><th>Montant</th><th>Début</th><th>Fin</th><th>Fréquence</th><th>Membres</th><th>Actions</th></tr></thead>
                     <tbody>
                         @foreach($tontines as $t)
                         <tr>
-                            <td>#{{ $t->id }}</td><td>{{ $t->nom }}</td><td>{{ $t->description }}</td>
+                            <td><input type="checkbox" name="tontine_ids[]" value="{{ $t->id }}"></td>
+                            <td>#{{ $t->id }}</td>
+                            <td>{{ $t->nom }}</td>
+                            <td>{{ $t->description }}</td>
                             <td>{{ number_format($t->montant, 0, ',', ' ') }} F</td>
-                            <td>{{ $t->date_debut }}</td><td>{{ $t->date_fin }}</td>
+                            <td>{{ $t->date_debut }}</td>
+                            <td>{{ $t->date_fin }}</td>
                             <td><span class="badge badge-yellow">{{ $t->frequence }}</span></td>
                             <td><span class="badge badge-green">{{ $t->membres->count() }} membre(s)</span></td>
                             <td><div class="actions">
-                                <button class="btn btn-profil" onclick="voirMembresTontine({{ $t->id }})">👥 Gérer</button>
+                                <button class="btn btn-profil" onclick="voirMembresTontine({{ $t->id }})">Gérer</button>
                                 <button class="btn btn-edit" onclick="openEditTontine({{ $t->id }},'{{ addslashes($t->nom) }}','{{ addslashes($t->description) }}',{{ $t->montant }},'{{ $t->date_debut }}','{{ $t->date_fin }}','{{ $t->frequence }}')">Modifier</button>
                                 <form action="/tontine/{{ $t->id }}" method="post" onsubmit="return confirm('Supprimer cette tontine ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
                             </div></td>
@@ -419,6 +470,10 @@
                         @endforeach
                     </tbody>
                 </table>
+                <div style="padding:1rem 1.5rem;">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer les tontines sélectionnées ?')">Supprimer la sélection</button>
+                </div>
+                </form>
             </div>
         </div>
 
@@ -449,62 +504,6 @@
                         <tbody id="tbody-membres-tontine"></tbody>
                     </table>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- COTISATIONS -->
-    <div class="section" id="section-cotisations">
-        <div class="panel">
-            <div class="panel-header"><div class="panel-title">Ajouter une cotisation</div></div>
-            <div class="panel-body">
-                <form action="/cotisation" method="post">
-                    @csrf
-                    <div class="form-grid">
-                        <div class="form-group"><label class="form-label">Tontine</label>
-                            <select name="tontine_id" class="form-control" required>
-                                <option value="">Choisir une tontine</option>
-                                @foreach($tontines as $t)
-                                <option value="{{ $t->id }}">{{ $t->nom }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group"><label class="form-label">Membre</label>
-                            <select name="membre_id" class="form-control" required>
-                                <option value="">Choisir un membre</option>
-                                @foreach($membres as $m)
-                                <option value="{{ $m->id }}">{{ $m->nom }} {{ $m->prenom }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group"><label class="form-label">Montant (F CFA)</label><input type="number" name="montant" class="form-control" required></div>
-                        <div class="form-group"><label class="form-label">Date de cotisation</label><input type="date" name="date_cotisation" class="form-control" required></div>
-                    </div>
-                    <div class="btn-row"><button type="submit" class="btn btn-primary">Enregistrer</button></div>
-                </form>
-            </div>
-        </div>
-        <div class="panel">
-            <div class="panel-header"><div class="panel-title">Liste des cotisations</div></div>
-            <div class="table-wrap">
-                <table>
-                    <thead><tr><th>ID</th><th>Tontine</th><th>Montant</th><th>Date</th><th>Membre</th><th>Actions</th></tr></thead>
-                    <tbody>
-                        @foreach($cotisations as $c)
-                        <tr>
-                            <td>#{{ $c->id }}</td>
-                            <td>{{ $c->tontine->nom ?? '—' }}</td>
-                            <td>{{ number_format($c->montant, 0, ',', ' ') }} F</td>
-                            <td>{{ $c->date_cotisation }}</td>
-                            <td>{{ $c->membre->nom ?? '—' }} {{ $c->membre->prenom ?? '' }}</td>
-                            <td><div class="actions">
-                                <button class="btn btn-edit" onclick="openEditCotisation({{ $c->id }},{{ $c->montant }},'{{ $c->date_cotisation }}',{{ $c->membre_id ?? 0 }},{{ $c->tontine_id ?? 0 }})">Modifier</button>
-                                <form action="/cotisation/{{ $c->id }}" method="post" onsubmit="return confirm('Supprimer ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
-                            </div></td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
@@ -546,13 +545,24 @@
             </div>
         </div>
         <div class="panel">
-            <div class="panel-header"><div class="panel-title">Liste des tours</div></div>
+            <div class="panel-header">
+                <div class="panel-title">Liste des tours</div>
+                <div class="btn-group">
+                    <form action="/tours/supprimer-tout" method="post" onsubmit="return confirm('Supprimer tous les tours ?')">
+                        @csrf
+                        <button type="submit" class="btn btn-danger">Supprimer tout</button>
+                    </form>
+                </div>
+            </div>
             <div class="table-wrap">
+                <form action="/tours/supprimer-selection" method="post" id="formSelectionTours">
+                    @csrf
                 <table>
-                   <thead><tr><th>ID</th><th>Tontine</th><th>Bénéficiaire</th><th>Date</th><th>État</th><th>Mode réception</th><th>Actions</th></tr></thead>
+                    <thead><tr><th></th><th>ID</th><th>Tontine</th><th>Bénéficiaire</th><th>Date</th><th>État</th><th>Mode réception</th><th>Actions</th></tr></thead>
                     <tbody>
                         @foreach($tours as $tour)
                         <tr>
+                            <td><input type="checkbox" name="tour_ids[]" value="{{ $tour->id }}"></td>
                             <td>#{{ $tour->id }}</td>
                             <td>{{ $tour->tontine->nom ?? '—' }}</td>
                             <td>{{ $tour->membre->nom ?? '—' }} {{ $tour->membre->prenom ?? '' }}</td>
@@ -567,9 +577,85 @@
                         @endforeach
                     </tbody>
                 </table>
+                <div style="padding:1rem 1.5rem;">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer les tours sélectionnés ?')">Supprimer la sélection</button>
+                </div>
+                </form>
             </div>
         </div>
     </div>
+
+    <!-- COTISATIONS -->
+    <div class="section" id="section-cotisations">
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">Ajouter une cotisation</div></div>
+            <div class="panel-body">
+                <form action="/cotisation" method="post">
+                    @csrf
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Tontine</label>
+                            <select name="tontine_id" class="form-control" required>
+                                <option value="">Choisir une tontine</option>
+                                @foreach($tontines as $t)
+                                <option value="{{ $t->id }}">{{ $t->nom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group"><label class="form-label">Membre</label>
+                            <select name="membre_id" class="form-control" required>
+                                <option value="">Choisir un membre</option>
+                                @foreach($membres as $m)
+                                <option value="{{ $m->id }}">{{ $m->nom }} {{ $m->prenom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group"><label class="form-label">Montant (F CFA)</label><input type="number" name="montant" class="form-control" required></div>
+                        <div class="form-group"><label class="form-label">Date de cotisation</label><input type="date" name="date_cotisation" class="form-control" required></div>
+                    </div>
+                    <div class="btn-row"><button type="submit" class="btn btn-primary">Enregistrer</button></div>
+                </form>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">Liste des cotisations</div>
+                <div class="btn-group">
+                    <form action="/cotisations/supprimer-tout" method="post" onsubmit="return confirm('Supprimer toutes les cotisations ?')">
+                        @csrf
+                        <button type="submit" class="btn btn-danger">Supprimer tout</button>
+                    </form>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <form action="/cotisations/supprimer-selection" method="post" id="formSelectionCotisations">
+                    @csrf
+                <table>
+                    <thead><tr><th></th><th>ID</th><th>Tontine</th><th>Montant</th><th>Date</th><th>Membre</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        @foreach($cotisations as $c)
+                        <tr>
+                            <td><input type="checkbox" name="cotisation_ids[]" value="{{ $c->id }}"></td>
+                            <td>#{{ $c->id }}</td>
+                            <td>{{ $c->tontine->nom ?? '—' }}</td>
+                            <td>{{ number_format($c->montant, 0, ',', ' ') }} F</td>
+                            <td>{{ $c->date_cotisation }}</td>
+                            <td>{{ $c->membre->nom ?? '—' }} {{ $c->membre->prenom ?? '' }}</td>
+                            <td><div class="actions">
+                                <button class="btn btn-edit" onclick="openEditCotisation({{ $c->id }},{{ $c->montant }},'{{ $c->date_cotisation }}',{{ $c->membre_id ?? 0 }},{{ $c->tontine_id ?? 0 }})">Modifier</button>
+                                <form action="/cotisation/{{ $c->id }}" method="post" onsubmit="return confirm('Supprimer ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
+                            </div></td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <div style="padding:1rem 1.5rem;">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer les cotisations sélectionnées ?')">Supprimer la sélection</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </main>
 
 <!-- MODALS -->
@@ -689,11 +775,10 @@
         tours: 'Gestion des <span>tours</span>',
     };
 
-   const navMap = {
+    const navMap = {
         home: 0, inscriptions: 1, membres: 2, tontines: 3, tours: 4, cotisations: 5
     };
 
-    // ✅ CLEF : lire la session Laravel pour afficher la bonne section
     const sessionSection = '{{ session("section") ?? "home" }}';
 
     function showSection(name, btn) {
@@ -710,7 +795,6 @@
         showSection(name, navButtons[navMap[name]] || null);
     }
 
-    // ✅ Au chargement, afficher la section de la session
     window.addEventListener('DOMContentLoaded', () => {
         const navButtons = document.querySelectorAll('.nav-item');
         showSection(sessionSection, navButtons[navMap[sessionSection]] || navButtons[0]);
@@ -780,13 +864,13 @@
                     <td>${m.nom}</td>
                     <td>${m.prenom}</td>
                     <td>${m.email}</td>
-                    <td><span class="badge ${isAdmin ? 'badge-green' : 'badge-yellow'}">${isAdmin ? '⭐ Admin' : 'Membre'}</span></td>
+                    <td><span class="badge ${isAdmin ? 'badge-green' : 'badge-yellow'}">${isAdmin ? 'Admin' : 'Membre'}</span></td>
                     <td>
                         <div class="actions">
                             ${!isAdmin ? `
                             <form action="/admin/tontine/${tontineId}/membre/${m.id}/rendre-admin" method="post" onsubmit="return confirm('Rendre ${m.prenom} admin ?')">
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="btn btn-gold">⭐ Rendre admin</button>
+                                <button type="submit" class="btn btn-gold">Rendre admin</button>
                             </form>` : `<span style="font-size:0.78rem;color:var(--muted);">Admin actuel</span>`}
                             <form action="/tontine/${tontineId}/membre/${m.id}" method="post" onsubmit="return confirm('Retirer ce membre ?')">
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
