@@ -10,14 +10,15 @@ use Illuminate\Http\Request;
 
 class ControlleurTour extends Controller
 {
-   public function index()
+    public function index()
     {
         $tours = Tour::with(['tontine', 'membre'])->get();
         $tontines = Tontine::all();
         $membres = Membre::all();
         return view('tour', compact('tours', 'tontines', 'membres'));
     }
-   public function store(Request $request)
+
+    public function store(Request $request)
     {
         $request->validate([
             'tontine_id' => 'required|exists:tontines,id',
@@ -37,7 +38,6 @@ class ControlleurTour extends Controller
         $beneficiaire = Membre::findOrFail($request->membre_id);
         $tontine = Tontine::findOrFail($request->tontine_id);
 
-        // Notifier le bénéficiaire
         NotificationMembre::create([
             'membre_id' => $beneficiaire->id,
             'titre'     => 'Vous êtes bénéficiaire !',
@@ -45,7 +45,6 @@ class ControlleurTour extends Controller
             'lu'        => false,
         ]);
 
-        // Notifier les autres membres de la tontine
         $autresMembres = $tontine->membres()->where('membres.id', '!=', $beneficiaire->id)->get();
         foreach ($autresMembres as $m) {
             NotificationMembre::create([
@@ -58,8 +57,9 @@ class ControlleurTour extends Controller
 
         $tour->update(['notifie' => true]);
 
-        return redirect('/dashboard')->with('success', 'Tour ajouté avec succès !')->with('section', 'tours');
+        return back()->with('success', 'Tour créé avec succès !')->with('section', 'tours'); // ✅ return ajouté
     }
+
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -71,10 +71,10 @@ class ControlleurTour extends Controller
         $tour = Tour::findOrFail($id);
         $tour->update($request->only(['tontine_id', 'date_tour', 'etat']));
 
-        return redirect('/dashboard')->with('success', 'Tour modifié avec succès !')->with('section', 'tours');
+        return back()->with('success', 'Tour modifié avec succès !')->with('section', 'tours'); // ✅ return ajouté
     }
 
-   public function choisirModeReception(Request $request, $id)
+    public function choisirModeReception(Request $request, $id)
     {
         $request->validate([
             'mode_reception' => 'required|in:presentiel,operateur',
@@ -95,6 +95,7 @@ class ControlleurTour extends Controller
 
         return redirect('/mon-espace')->with('success', 'Mode de réception enregistré !');
     }
+
     public function destroy($id)
     {
         $tour = Tour::findOrFail($id);
@@ -102,6 +103,7 @@ class ControlleurTour extends Controller
 
         return redirect('/dashboard')->with('success', 'Tour supprimé avec succès !')->with('section', 'tours');
     }
+
     public function supprimerSelection(Request $request)
     {
         $ids = $request->input('tour_ids', []);

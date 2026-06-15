@@ -14,7 +14,18 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Session;
 
 class AdminExportController extends Controller
+{private function redirectRole($message, $section = 'home')
 {
+    $role = Session::get('role');
+    if ($role === 'gerant' || $role === 'admin') {
+        return redirect('/gerant')
+            ->with('success', $message)
+            ->with('section', $section);
+    }
+    return redirect('/dashboard')
+        ->with('success', $message)
+        ->with('section', $section);
+}
     public function pdfMembre($id)
     {
         $membre = Membre::with('cotisations')->findOrFail($id);
@@ -46,12 +57,12 @@ class AdminExportController extends Controller
         foreach ($membres as $membre) {
             NotificationMembre::create([
                 'membre_id' => $membre->id,
-                'titre'     => 'Nouveau tour programmé',
-                'message'   => 'Un tour a été programmé pour le ' . \Carbon\Carbon::parse($tour->date_tour)->locale('fr')->isoFormat('dddd D MMMM YYYY') . '. État : ' . ($tour->etat === 'terminer' ? 'Terminé' : 'En attente') . '.',
+                'titre'     => 'Nouveau tour programme',
+                'message'   => 'Un tour a ete programme pour le ' . \Carbon\Carbon::parse($tour->date_tour)->locale('fr')->isoFormat('dddd D MMMM YYYY') . '. Etat : ' . ($tour->etat === 'terminer' ? 'Termine' : 'En attente') . '.',
             ]);
         }
 
-        return back()->with('success', 'Notifications envoyées à tous les membres !');
+        return $this->redirectRole('Notifications envoyees a tous les membres !', 'tours');
     }
 
     public function approuverMembre($id)
@@ -61,14 +72,14 @@ class AdminExportController extends Controller
 
         NotificationMembre::create([
             'membre_id' => $membre->id,
-            'titre'     => 'Compte approuvé',
-            'message'   => 'Félicitations ' . $membre->prenom . ' ! Votre compte a été approuvé. Vous pouvez maintenant accéder à votre espace membre.',
+            'titre'     => 'Compte approuve',
+            'message'   => 'Felicitations ' . $membre->prenom . ' ! Votre compte a ete approuve. Vous pouvez maintenant acceder a votre espace membre.',
             'lu'        => false,
         ]);
 
         NotificationAdmin::where('membre_id', $membre->id)->update(['lu' => true]);
 
-        return back()->with('success', $membre->prenom . ' a été approuvé !')->with('section', 'inscriptions');
+        return $this->redirectRole($membre->prenom . ' a ete approuve !', 'inscriptions');
     }
 
     public function refuserMembre($id)
@@ -78,14 +89,14 @@ class AdminExportController extends Controller
 
         NotificationMembre::create([
             'membre_id' => $membre->id,
-            'titre'     => 'Compte refusé',
-            'message'   => 'Votre demande d\'inscription a été refusée. Contactez-nous pour plus d\'informations.',
+            'titre'     => 'Compte refuse',
+            'message'   => 'Votre demande d\'inscription a ete refusee. Contactez-nous pour plus d\'informations.',
             'lu'        => false,
         ]);
 
         NotificationAdmin::where('membre_id', $membre->id)->update(['lu' => true]);
 
-        return back()->with('success', $membre->prenom . ' a été refusé.')->with('section', 'inscriptions');
+        return $this->redirectRole($membre->prenom . ' a ete refuse.', 'inscriptions');
     }
 
     public function approuverTout()
@@ -96,15 +107,15 @@ class AdminExportController extends Controller
             $membre->update(['statut' => 'approuve']);
             NotificationMembre::create([
                 'membre_id' => $membre->id,
-                'titre'     => 'Compte approuvé',
-                'message'   => 'Félicitations ' . $membre->prenom . ' ! Votre compte a été approuvé.',
+                'titre'     => 'Compte approuve',
+                'message'   => 'Felicitations ' . $membre->prenom . ' ! Votre compte a ete approuve.',
                 'lu'        => false,
             ]);
         }
 
         NotificationAdmin::whereIn('membre_id', $membres->pluck('id'))->update(['lu' => true]);
 
-        return back()->with('success', $membres->count() . ' membre(s) approuvé(s) !')->with('section', 'inscriptions');
+        return $this->redirectRole($membres->count() . ' membre(s) approuve(s) !', 'inscriptions');
     }
 
     public function refuserTout()
@@ -115,18 +126,17 @@ class AdminExportController extends Controller
             $membre->update(['statut' => 'refuse']);
             NotificationMembre::create([
                 'membre_id' => $membre->id,
-                'titre'     => 'Compte refusé',
-                'message'   => 'Votre demande d\'inscription a été refusée.',
+                'titre'     => 'Compte refuse',
+                'message'   => 'Votre demande d\'inscription a ete refusee.',
                 'lu'        => false,
             ]);
         }
 
         NotificationAdmin::whereIn('membre_id', $membres->pluck('id'))->update(['lu' => true]);
 
-        return back()->with('success', $membres->count() . ' membre(s) refusé(s).')->with('section', 'inscriptions');
+        return $this->redirectRole($membres->count() . ' membre(s) refuse(s).', 'inscriptions');
     }
 
-    // Rendre admin d'une tontine (table pivot)
     public function rendreAdminTontine($tontineId, $membreId)
     {
         $tontine = Tontine::findOrFail($tontineId);
@@ -139,19 +149,18 @@ class AdminExportController extends Controller
         $membre = Membre::findOrFail($membreId);
         NotificationMembre::create([
             'membre_id' => $membreId,
-            'titre'     => 'Vous êtes admin de tontine',
-            'message'   => 'Vous avez été nommé administrateur de la tontine "' . $tontine->nom . '".',
+            'titre'     => 'Vous etes admin de tontine',
+            'message'   => 'Vous avez ete nomme administrateur de la tontine "' . $tontine->nom . '".',
             'lu'        => false,
         ]);
 
-        return back()->with('success', $membre->prenom . ' est maintenant admin de "' . $tontine->nom . '" !')->with('section', 'tontines');
+        return $this->redirectRole($membre->prenom . ' est maintenant admin de "' . $tontine->nom . '" !', 'tontines');
     }
 
-    // Rendre admin global (accès dashboard)
     public function rendreAdmin($id)
     {
         if (Session::get('role') !== 'super_admin') {
-            return redirect()->back()->with('error', 'Action non autorisée.')->with('section', 'membres');
+            return redirect('/dashboard')->with('error', 'Action non autorisee.')->with('section', 'membres');
         }
 
         $membre = Membre::findOrFail($id);
@@ -159,19 +168,18 @@ class AdminExportController extends Controller
 
         NotificationMembre::create([
             'membre_id' => $membre->id,
-            'titre'     => 'Vous êtes maintenant admin',
-            'message'   => 'Félicitations ' . $membre->prenom . ' ! Vous avez été nommé administrateur de TontineTD.',
+            'titre'     => 'Vous etes maintenant admin',
+            'message'   => 'Felicitations ' . $membre->prenom . ' ! Vous avez ete nomme administrateur de TontineTD.',
             'lu'        => false,
         ]);
 
-        return back()->with('success', $membre->prenom . ' est maintenant admin !')->with('section', 'membres');
+        return $this->redirectRole($membre->prenom . ' est maintenant admin !', 'membres');
     }
 
-    // Rendre gérant (accès dashboard gérant)
     public function rendreGerant($id)
     {
         if (Session::get('role') !== 'super_admin') {
-            return redirect()->back()->with('error', 'Action non autorisée.')->with('section', 'membres');
+            return redirect('/dashboard')->with('error', 'Action non autorisee.')->with('section', 'membres');
         }
 
         $membre = Membre::findOrFail($id);
@@ -179,19 +187,18 @@ class AdminExportController extends Controller
 
         NotificationMembre::create([
             'membre_id' => $membre->id,
-            'titre'     => 'Vous êtes maintenant gérant',
-            'message'   => 'Félicitations ' . $membre->prenom . ' ! Vous avez été nommé gérant de TontineTD.',
+            'titre'     => 'Vous etes maintenant gerant',
+            'message'   => 'Felicitations ' . $membre->prenom . ' ! Vous avez ete nomme gerant de TontineTD.',
             'lu'        => false,
         ]);
 
-        return back()->with('success', $membre->prenom . ' est maintenant gérant !')->with('section', 'membres');
+        return $this->redirectRole($membre->prenom . ' est maintenant gerant !', 'membres');
     }
 
-    // Retirer le rôle (redevient membre simple)
     public function retirerRole($id)
     {
         if (Session::get('role') !== 'super_admin') {
-            return redirect()->back()->with('error', 'Action non autorisée.')->with('section', 'membres');
+            return redirect('/dashboard')->with('error', 'Action non autorisee.')->with('section', 'membres');
         }
 
         $membre = Membre::findOrFail($id);
@@ -199,15 +206,14 @@ class AdminExportController extends Controller
 
         NotificationMembre::create([
             'membre_id' => $membre->id,
-            'titre'     => 'Rôle retiré',
-            'message'   => 'Votre rôle a été retiré par l\'administrateur. Vous êtes maintenant membre simple.',
+            'titre'     => 'Role retire',
+            'message'   => 'Votre role a ete retire par l\'administrateur. Vous etes maintenant membre simple.',
             'lu'        => false,
         ]);
 
-        return back()->with('success', 'Rôle retiré pour ' . $membre->prenom . '.')->with('section', 'membres');
+        return $this->redirectRole('Role retire pour ' . $membre->prenom . '.', 'membres');
     }
 
-    // Activer un membre
     public function activer($id)
     {
         $membre = Membre::findOrFail($id);
@@ -215,39 +221,38 @@ class AdminExportController extends Controller
 
         NotificationMembre::create([
             'membre_id' => $membre->id,
-            'titre'     => 'Compte activé',
-            'message'   => 'Votre compte a été activé. Vous pouvez maintenant vous connecter.',
+            'titre'     => 'Compte active',
+            'message'   => 'Votre compte a ete active. Vous pouvez maintenant vous connecter.',
             'lu'        => false,
         ]);
 
-        return back()->with('success', $membre->prenom . ' a été activé !')->with('section', 'membres');
+        return $this->redirectRole($membre->prenom . ' a ete active !', 'membres');
     }
 
-    // Désactiver un membre
     public function desactiver($id)
     {
         $membre = Membre::findOrFail($id);
-        $membre->update(['statut' => 'desactive']);
+        $membre->update(['statut' => 'refuse']);
 
         NotificationMembre::create([
             'membre_id' => $membre->id,
-            'titre'     => 'Compte désactivé',
-            'message'   => 'Votre compte a été désactivé. Contactez l\'administrateur.',
+            'titre'     => 'Compte desactive',
+            'message'   => 'Votre compte a ete desactive. Contactez l\'administrateur pour plus d\'informations.',
             'lu'        => false,
         ]);
 
-        return back()->with('success', $membre->prenom . ' a été désactivé.')->with('section', 'membres');
+        return $this->redirectRole($membre->prenom . ' a ete desactive.', 'membres');
     }
 
     public function marquerToutLu()
     {
         NotificationAdmin::where('lu', false)->update(['lu' => true]);
-        return back()->with('success', 'Toutes les notifications ont été marquées comme lues.')->with('section', 'inscriptions');
+        return $this->redirectRole('Toutes les notifications ont ete marquees comme lues.', 'inscriptions');
     }
 
     public function supprimerToutNotifs()
     {
         NotificationAdmin::truncate();
-        return back()->with('success', 'Toutes les notifications ont été supprimées.')->with('section', 'inscriptions');
+        return $this->redirectRole('Toutes les notifications ont ete supprimees.', 'inscriptions');
     }
 }

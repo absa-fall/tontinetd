@@ -13,7 +13,7 @@ class ControlleurCotisation extends Controller
         return view('cotisations.index', compact('cotisations'));
     }
 
-   public function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'montant'         => 'required|numeric|min:1',
@@ -22,7 +22,6 @@ class ControlleurCotisation extends Controller
             'tontine_id'      => 'required|exists:tontines,id',
         ]);
 
-        // Vérifier le tour en cours pour cette tontine
         $tourEnCours = \App\Models\Tour::where('tontine_id', $request->tontine_id)
             ->where('etat', 'en_attente')
             ->orderBy('date_tour', 'asc')
@@ -50,7 +49,7 @@ class ControlleurCotisation extends Controller
             'moyen_paiement'  => 'cash',
         ]);
 
-        return redirect('/dashboard')->with('success', 'Cotisation ajoutée avec succès !')->with('section', 'cotisations');
+        return back()->with('success', 'Cotisation ajoutée avec succès !')->with('section', 'cotisations');
     }
 
     public function update(Request $request, $id)
@@ -65,7 +64,9 @@ class ControlleurCotisation extends Controller
         $cotisation = Cotisation::findOrFail($id);
         $cotisation->update($request->all());
 
-        return redirect('/dashboard')->with('success', 'Cotisation modifiée avec succès !')->with('section', 'cotisations');
+        return redirect('/gerant')
+            ->with('success', 'Cotisation modifiée avec succès !')
+            ->with('section', 'cotisations');
     }
 
     public function destroy($id)
@@ -73,8 +74,9 @@ class ControlleurCotisation extends Controller
         $cotisation = Cotisation::findOrFail($id);
         $cotisation->delete();
 
-        return redirect('/dashboard')->with('success', 'Cotisation supprimée avec succès !')->with('section', 'cotisations');
+        return back()->with('success', 'Cotisation supprimée avec succès !')->with('section', 'cotisations');
     }
+
     public function supprimerSelection(Request $request)
     {
         $ids = $request->input('cotisation_ids', []);

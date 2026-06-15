@@ -5,9 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Membre;
 use App\Models\NotificationMembre;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class ControlleurMembre extends Controller
 {
+   private function redirectRole($message, $section = 'membres')
+{
+    $role = Session::get('role');
+    if ($role === 'gerant' || $role === 'admin') {
+        return redirect('/gerant')
+            ->with('success', $message)
+            ->with('section', $section);
+    }
+    return redirect('/dashboard')
+        ->with('success', $message)
+        ->with('section', $section);
+}
+
     public function index()
     {
         $membres = Membre::all();
@@ -33,9 +47,9 @@ class ControlleurMembre extends Controller
             'telephone'      => $request->telephone,
             'adresse'        => $request->adresse,
             'date_naissance' => $request->date_naissance,
+            'statut'         => 'approuve',
         ]);
 
-        // Notifier tous les membres existants (sauf le nouveau)
         $membres = Membre::where('id', '!=', $nouveau->id)->get();
         foreach ($membres as $m) {
             NotificationMembre::create([
@@ -46,7 +60,7 @@ class ControlleurMembre extends Controller
             ]);
         }
 
-        return redirect('/dashboard')->with('success', 'Membre ajouté avec succès !')->with('section', 'membres');
+        return $this->redirectRole($nouveau->prenom . ' a ete ajoute avec succes !', 'membres');
     }
 
     public function update(Request $request, $id)
@@ -61,17 +75,25 @@ class ControlleurMembre extends Controller
         ]);
 
         $membre = Membre::findOrFail($id);
-        $membre->update($request->all());
+        $membre->update([
+            'nom'            => $request->nom,
+            'prenom'         => $request->prenom,
+            'email'          => $request->email,
+            'telephone'      => $request->telephone,
+            'adresse'        => $request->adresse,
+            'date_naissance' => $request->date_naissance,
+        ]);
 
-        return redirect('/dashboard')->with('success', 'Membre modifié avec succès !')->with('section', 'membres');
+        return $this->redirectRole($membre->prenom . ' a ete modifie avec succes !', 'membres');
     }
 
     public function destroy($id)
     {
         $membre = Membre::findOrFail($id);
+        $nom = $membre->prenom . ' ' . $membre->nom;
         $membre->delete();
 
-        return redirect('/dashboard')->with('success', 'Membre supprimé avec succès !')->with('section', 'membres');
+        return $this->redirectRole($nom . ' a ete supprime.', 'membres');
     }
 
     public function show($id)

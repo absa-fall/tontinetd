@@ -119,7 +119,7 @@
     <div class="logo"><div class="logo-icon">T</div>TontineTD</div>
     <div class="logo-sub">Espace Gérant</div>
     <div class="gerant-info">
-        <div class="gerant-badge">⭐ Gérant</div>
+        <div class="gerant-badge">Gérant</div>
         <div class="gerant-name">{{ $gerant->prenom }} {{ $gerant->nom }}</div>
     </div>
     <div class="nav-label">Navigation</div>
@@ -189,7 +189,7 @@
                     </form>
                     <form action="/admin/membres/refuser-tout" method="post" onsubmit="return confirm('Refuser tous ?')">
                         @csrf
-                        <button type="submit" class="btn btn-danger"> Refuser tout</button>
+                        <button type="submit" class="btn btn-danger">Refuser tout</button>
                     </form>
                     @endif
                 </div>
@@ -213,11 +213,11 @@
                                 <div class="actions">
                                     <form action="/admin/membre/{{ $m->id }}/approuver" method="post" onsubmit="return confirm('Approuver ?')">
                                         @csrf
-                                        <button type="submit" class="btn btn-profil">✅ Approuver</button>
+                                        <button type="submit" class="btn btn-profil">Approuver</button>
                                     </form>
                                     <form action="/admin/membre/{{ $m->id }}/refuser" method="post" onsubmit="return confirm('Refuser ?')">
                                         @csrf
-                                        <button type="submit" class="btn btn-danger">❌ Refuser</button>
+                                        <button type="submit" class="btn btn-danger">Refuser</button>
                                     </form>
                                 </div>
                             </td>
@@ -226,7 +226,7 @@
                     </tbody>
                 </table>
                 @else
-                <div class="empty">✅ Aucune inscription en attente.</div>
+                <div class="empty">Aucune inscription en attente.</div>
                 @endif
             </div>
         </div>
@@ -235,7 +235,7 @@
     <!-- HOME -->
     <div class="section active" id="section-home">
         <div class="privilege-box">
-            <strong>⭐ Vos privilèges de gérant</strong>
+            <strong>Vos privilèges de gérant</strong>
             Vous pouvez gérer les membres, tontines, cotisations, tours et approuver les inscriptions. Vous ne pouvez pas supprimer un membre ni voir son profil détaillé.
         </div>
         <div class="panel">
@@ -306,16 +306,16 @@
                             </td>
                             <td>
                                 <div class="actions">
-                                    <button class="btn btn-edit" onclick="openEditMembre({{ $m->id }},'{{ addslashes($m->nom) }}','{{ addslashes($m->prenom) }}','{{ $m->email }}','{{ $m->telephone }}','{{ addslashes($m->adresse) }}','{{ $m->date_naissance }}')">Modifier</button>
+                                    <button type="button" class="btn btn-edit" onclick="openEditMembre({{ $m->id }},'{{ addslashes($m->nom) }}','{{ addslashes($m->prenom) }}','{{ $m->email }}','{{ $m->telephone }}','{{ addslashes($m->adresse) }}','{{ $m->date_naissance }}')">Modifier</button>
                                     @if($m->statut === 'approuve')
                                     <form action="/admin/membre/{{ $m->id }}/desactiver" method="post" onsubmit="return confirm('Désactiver {{ $m->prenom }} ?')">
                                         @csrf
-                                        <button type="submit" class="btn btn-deactivate">🚫 Désactiver</button>
+                                        <button type="submit" class="btn btn-deactivate">Désactiver</button>
                                     </form>
                                     @else
                                     <form action="/admin/membre/{{ $m->id }}/activer" method="post" onsubmit="return confirm('Activer {{ $m->prenom }} ?')">
                                         @csrf
-                                        <button type="submit" class="btn btn-activate">✅ Activer</button>
+                                        <button type="submit" class="btn btn-activate">Activer</button>
                                     </form>
                                     @endif
                                 </div>
@@ -327,76 +327,97 @@
             </div>
         </div>
     </div>
-
-    <!-- TONTINES -->
-    <div class="section" id="section-tontines">
-        <div class="panel">
-            <div class="panel-header"><div class="panel-title">Créer une tontine</div></div>
-            <div class="panel-body">
-                <form action="/tontine" method="post">
-                    @csrf
-                    <div class="form-grid">
-                        <div class="form-group"><label class="form-label">Nom</label><input type="text" name="nom" class="form-control" required></div>
-                        <div class="form-group"><label class="form-label">Description</label><input type="text" name="description" class="form-control" required></div>
-                        <div class="form-group"><label class="form-label">Montant (F CFA)</label><input type="number" name="montant" class="form-control" required></div>
-                        <div class="form-group"><label class="form-label">Date début</label><input type="date" name="date_debut" class="form-control" required></div>
-                        <div class="form-group"><label class="form-label">Date fin</label><input type="date" name="date_fin" class="form-control" required></div>
-                        <div class="form-group"><label class="form-label">Fréquence</label>
-                            <select name="frequence" class="form-control">
-                                <option value="semaine">Hebdomadaire</option>
-                                <option value="mensuelle">Mensuelle</option>
-                                <option value="journalier">Journalier</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="btn-row"><button type="submit" class="btn btn-primary">Créer</button></div>
-                </form>
-            </div>
-        </div>
-       \<div class="panel">
-            <div class="panel-header">
-                <div class="panel-title">Liste des tontines</div>
-                <div class="btn-group">
-                    <form action="/tontines/supprimer-tout" method="post" onsubmit="return confirm('Supprimer toutes les tontines ?')">
-                        @csrf
-                        <button type="submit" class="btn btn-danger">Supprimer tout</button>
-                    </form>
-                </div>
-            </div>
-            <div class="table-wrap">
-                <form action="/tontines/supprimer-selection" method="post" id="formSelectionTontines">
-                    @csrf
-                <table>
-                    <thead><tr><th></th><th>ID</th><th>Nom</th><th>Montant</th><th>Début</th><th>Fin</th><th>Fréquence</th><th>Membres</th><th>Actions</th></tr></thead>
-                    <tbody>
-                        @foreach($tontines as $t)
-                        <tr>
-                            <td><input type="checkbox" name="tontine_ids[]" value="{{ $t->id }}"></td>
-                            <td>#{{ $t->id }}</td>
-                            <td>{{ $t->nom }}</td>
-                            <td>{{ number_format($t->montant, 0, ',', ' ') }} F</td>
-                            <td>{{ $t->date_debut }}</td>
-                            <td>{{ $t->date_fin }}</td>
-                            <td><span class="badge badge-yellow">{{ $t->frequence }}</span></td>
-                            <td><span class="badge badge-green">{{ $t->membres->count() }}</span></td>
-                            <td><div class="actions">
-<td><div class="actions">
-                                <a href="/tontine/{{ $t->id }}/details" class="btn btn-profil">Détails</a>
-                                <button type="button" class="btn btn-edit" onclick="openEditTontine({{ $t->id }},'{{ addslashes($t->nom) }}','{{ addslashes($t->description) }}',{{ $t->montant }},'{{ $t->date_debut }}','{{ $t->date_fin }}','{{ $t->frequence }}')">Modifier</button>
-                            </div></td>
-                            </div></td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                <div style="padding:1rem 1.5rem;">
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer les tontines sélectionnées ?')">Supprimer la sélection</button>
-                </div>
-                </form>
-            </div>
+<!-- TONTINES -->
+<div class="section" id="section-tontines">
+    <div class="panel">
+        <div class="panel-header"><div class="panel-title">Créer une tontine</div></div>
+        <div class="panel-body">
+            <form action="/tontine" method="post">
+                @csrf
+              <div class="form-grid">
+    <div class="form-group">
+        <label class="form-label">Nom</label>
+        <input type="text" name="nom" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Description</label>
+        <input type="text" name="description" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Montant (F CFA)</label>
+        <input type="number" name="montant" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Date début</label>
+        <input type="date" name="date_debut" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Date fin</label>
+        <input type="date" name="date_fin" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Fréquence</label>
+        <select name="frequence" class="form-control">
+            <option value="semaine">Hebdomadaire</option>
+            <option value="mensuelle">Mensuelle</option>
+            <option value="journalier">Journalier</option>
+        </select>
+    </div>
+  {{-- ✅ SÉLECTION MEMBRES --}}
+<div class="form-group">
+    <label class="form-label">Membres bénéficiaires</label>
+    <select name="membre_ids[]" class="form-control" required>
+        <option value="">Choisir un membre</option>
+        @foreach($membres as $m)
+        <option value="{{ $m->id }}">{{ $m->prenom }} {{ $m->nom }}</option>
+        @endforeach
+    </select>
+</div>
+                <div class="btn-row"><button type="submit" class="btn btn-primary">Créer</button></div>
+            </form>
         </div>
     </div>
-
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">Liste des tontines</div>
+            <div class="btn-group">
+                <form action="/tontines/supprimer-tout" method="post" onsubmit="return confirm('Supprimer toutes les tontines ?')">
+                    @csrf
+                    <button type="submit" class="btn btn-danger">Supprimer tout</button>
+                </form>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <form action="/tontines/supprimer-selection" method="post" id="formSelectionTontines">
+                @csrf
+            <table>
+                <thead><tr><th></th><th>ID</th><th>Nom</th><th>Montant</th><th>Début</th><th>Fin</th><th>Fréquence</th><th>Membres</th><th>Actions</th></tr></thead>
+                <tbody>
+                    @foreach($tontines as $t)
+                    <tr>
+                        <td><input type="checkbox" name="tontine_ids[]" value="{{ $t->id }}"></td>
+                        <td>#{{ $t->id }}</td>
+                        <td>{{ $t->nom }}</td>
+                        <td>{{ number_format($t->montant, 0, ',', ' ') }} F</td>
+                        <td>{{ $t->date_debut }}</td>
+                        <td>{{ $t->date_fin }}</td>
+                        <td><span class="badge badge-yellow">{{ $t->frequence }}</span></td>
+                        <td><span class="badge badge-green">{{ $t->membres->count() }}</span></td>
+                        <td><div class="actions">
+                            <a href="/tontine/{{ $t->id }}/details" class="btn btn-profil">Détails</a>
+                            <button type="button" class="btn btn-edit" onclick="openEditTontine({{ $t->id }},'{{ addslashes($t->nom) }}','{{ addslashes($t->description) }}',{{ $t->montant }},'{{ $t->date_debut }}','{{ $t->date_fin }}','{{ $t->frequence }}')">Modifier</button>
+                        </div></td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <div style="padding:1rem 1.5rem;">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer les tontines sélectionnées ?')">Supprimer la sélection</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
     <!-- COTISATIONS -->
     <div class="section" id="section-cotisations">
         <div class="panel">
@@ -466,22 +487,27 @@
             </div>
         </div>
     </div>
-    </div>
 
     <!-- TOURS -->
     <div class="section" id="section-tours">
         <div class="panel">
             <div class="panel-header"><div class="panel-title">Ajouter un tour</div></div>
             <div class="panel-body">
-                <form action="/tour" method="post">
+               <form action="/tour" method="post">
                     @csrf
                     <div class="form-grid">
-                        <div class="form-group"><label class="form-label">Tontine</label>
-                            <select name="tontine_id" class="form-control" required>
+                       <div class="form-group"><label class="form-label">Tontine</label>
+                            <select name="tontine_id" id="tour_tontine_select" class="form-control" required onchange="suggererBeneficiaire(this.value)">
                                 <option value="">Choisir</option>
                                 @foreach($tontines as $t)
                                 <option value="{{ $t->id }}">{{ $t->nom }}</option>
                                 @endforeach
+                            </select>
+                            <div id="suggestion-beneficiaire" style="font-size:0.78rem;color:var(--green-mid);margin-top:0.4rem;"></div>
+                        </div>
+                        <div class="form-group"><label class="form-label">Membre bénéficiaire</label>
+                            <select name="membre_id" id="tour_membre_select" class="form-control" required>
+                                <option value="">Choisir une tontine d'abord</option>
                             </select>
                         </div>
                         <div class="form-group"><label class="form-label">Date du tour</label><input type="date" name="date_tour" class="form-control" required></div>
@@ -652,7 +678,7 @@
         tours: 'Gestion des <span>tours</span>',
     };
 
-   function showSection(name, btn) {
+    function showSection(name, btn) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         const section = document.getElementById('section-' + name);
@@ -669,9 +695,12 @@
         document.getElementById('pageTitle').innerHTML = titles[name] || name;
     }
 
-    @if(session('section'))
-        showSection('{{ session('section') }}', null);
-    @endif
+    {{-- ✅ CORRECTION : DOMContentLoaded pour que la section s'affiche après chargement --}}
+    document.addEventListener('DOMContentLoaded', function () {
+        @if(session('section'))
+            showSection('{{ session('section') }}', null);
+        @endif
+    });
 
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
@@ -717,6 +746,42 @@
     document.querySelectorAll('.modal-overlay').forEach(o => {
         o.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
     });
+
+    function suggererBeneficiaire(tontineId) {
+        const suggestionDiv = document.getElementById('suggestion-beneficiaire');
+        const membreSelect = document.getElementById('tour_membre_select');
+
+        if (!tontineId) {
+            suggestionDiv.textContent = '';
+            membreSelect.innerHTML = '<option value="">Choisir une tontine d\'abord</option>';
+            return;
+        }
+
+        fetch('/tontine/' + tontineId + '/prochain-beneficiaire')
+            .then(response => response.json())
+            .then(data => {
+                membreSelect.innerHTML = '<option value="">Choisir</option>';
+                if (data.membres && data.membres.length > 0) {
+                    data.membres.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m.id;
+                        opt.textContent = m.nom;
+                        if (m.id === data.membre_id) {
+                            opt.selected = true;
+                        }
+                        membreSelect.appendChild(opt);
+                    });
+                    suggestionDiv.textContent = data.nom ? 'Suggestion : ' + data.nom : '';
+                } else {
+                    membreSelect.innerHTML = '<option value="">Aucun membre</option>';
+                    suggestionDiv.textContent = 'Aucun membre dans cette tontine.';
+                }
+            })
+            .catch(() => {
+                suggestionDiv.textContent = '';
+            });
+    }
 </script>
+
 </body>
 </html>
