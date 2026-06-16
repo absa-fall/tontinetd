@@ -161,6 +161,7 @@
     <div class="nav-label">Menu</div>
     <button class="nav-item active" onclick="showSection('accueil', this)">Accueil</button>
    <button class="nav-item" onclick="showSection('tontines', this)">Mes tontines</button>
+   <a href="/tontines/publiques" class="nav-item" style="text-decoration:none;">Tontines disponibles</a>
     <button class="nav-item" onclick="showSection('tours', this)">Tours</button>
     @if($tontinesGerees->count() > 0)
     <button class="nav-item" onclick="showSection('gestion', this)">
@@ -231,13 +232,13 @@
             @foreach($membre->tontines as $tontine)
             <div class="tontine-card">
                 <div class="tontine-header">
-                    <div class="tontine-name">{{ $tontine->nom }}</div>
-                    @if($tontine->pivot->role === 'admin')
-                        <span class="badge-admin">Admin</span>
-                    @else
-                        <span class="badge-membre">Membre</span>
-                    @endif
-                </div>
+    <div class="tontine-name">{{ $tontine->nom }}</div>
+    @if($tontine->pivot->role === 'admin')
+        <span class="badge-admin">Gérant du tontine</span>
+    @else
+        <span class="badge-membre">Membre</span>
+    @endif
+</div>
                 <div class="tontine-info">
                     <strong>Montant :</strong> {{ number_format($tontine->montant, 0, ',', ' ') }} F |
                     <strong>Fréquence :</strong> {{ $tontine->frequence }} |
@@ -301,14 +302,14 @@
                 <div class="tontine-section">
                     <div class="tontine-section-title">Membres ({{ $tontine->membres->count() }})</div>
                     <div>
-                        @foreach($tontine->membres as $m)
-                        <span class="membre-tag">
-                            {{ $m->prenom }} {{ $m->nom }}
-                            @if($m->pivot->role === 'admin')
-                                <span style="color: var(--green-mid); font-size: 0.7rem;">(Admin)</span>
-                            @endif
-                        </span>
-                        @endforeach
+                       @foreach($tontine->membres as $m)
+<span class="membre-tag">
+    {{ $m->prenom }} {{ $m->nom }}
+    @if($m->pivot->role === 'admin')
+        <span style="color: var(--green-mid); font-size: 0.7rem;">(Gérant)</span>
+    @endif
+</span>
+@endforeach
                     </div>
                 </div>
             </div>
@@ -383,7 +384,34 @@
                 <div class="tontine-name">{{ $tontine->nom }}</div>
                 <span class="badge-admin"> Vous êtes gérant</span>
             </div>
-
+{{-- Demandes en attente --}}
+@if($tontine->demandesEnAttente->count() > 0)
+<div class="tontine-section">
+    <div class="tontine-section-title" style="color:var(--gold);">
+        ⏳ Demandes en attente ({{ $tontine->demandesEnAttente->count() }})
+    </div>
+    <table>
+        <thead><tr><th>Membre</th><th>Actions</th></tr></thead>
+        <tbody>
+            @foreach($tontine->demandesEnAttente as $demandeur)
+            <tr>
+                <td>{{ $demandeur->prenom }} {{ $demandeur->nom }}</td>
+                <td style="display:flex;gap:0.5rem;">
+                    <form action="/tontine/{{ $tontine->id }}/demande/{{ $demandeur->id }}/approuver" method="post">
+                        @csrf
+                        <button class="btn btn-primary" style="padding:0.3rem 0.7rem;font-size:0.75rem;">✓ Accepter</button>
+                    </form>
+                    <form action="/tontine/{{ $tontine->id }}/demande/{{ $demandeur->id }}/refuser" method="post">
+                        @csrf
+                        <button class="btn btn-pdf" style="padding:0.3rem 0.7rem;font-size:0.75rem;">✗ Refuser</button>
+                    </form>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+@endif
             <!-- Ajouter un tour -->
             <div class="tontine-section">
                 <div class="tontine-section-title">Ajouter un tour</div>

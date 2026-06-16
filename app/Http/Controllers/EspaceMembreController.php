@@ -26,45 +26,42 @@ class EspaceMembreController extends Controller
         ])->find($id);
     }
 public function index()
-    {
-        $membre = $this->getMembre();
-        if (!$membre) return redirect('/login');
-        
-        $membres = Membre::all();
-       
-       $admin = Membre::where('role', 'gerant')
-    ->orWhere('role', 'admin')
-    ->first();
-        // Tontines où ce membre est gérant
-        $tontinesGerees = $membre->tontines->filter(function($t) {
-            return $t->pivot->role === 'admin';
-        });
+{
+    $membre = $this->getMembre();
+    if (!$membre) return redirect('/login');
 
-        return view('espace-membre', compact('membre', 'membres', 'admin', 'tontinesGerees'));
-    }
-    public function ajouterCotisation(Request $request)
-    {
-        $membre = $this->getMembre();
-        if (!$membre) return redirect('/login');
+    $membres = Membre::all();
 
-        $request->validate([
-            'montant'         => 'required|numeric|min:1',
-            'date_cotisation' => 'required|date',
-            'tontine_id'      => 'required|exists:tontines,id',
-        ]);
+    $admin = Membre::where('role', 'gerant')
+        ->orWhere('role', 'admin')
+        ->first();
 
-        Cotisation::create([
-            'montant'         => $request->montant,
-            'date_cotisation' => $request->date_cotisation,
-            'membre_id'       => $membre->id,
-            'tontine_id'      => $request->tontine_id,
-            'ajout_par'       => 'membre',
-            'moyen_paiement'  => $request->moyen_paiement ?? 'cash',
-        ]);
+    $tontinesGerees = $membre->tontines->filter(function($t) {
+        return $t->pivot->role === 'admin';
+    })->map(function($t) {
+        return \App\Models\Tontine::with([
+            'membres',
+            'membresApprouves',
+            'demandesEnAttente',
+            'tours'
+        ])->find($t->id);
+    });
 
-        return back()->with('success', 'Cotisation ajoutée avec succès !');
-    }
+    $cotisations   = $membre->cotisations;
+    $tontines      = $membre->tontines;
+    $notifications = $membre->notifications()->orderBy('created_at', 'desc')->get();
 
+    return view('espace-membre', compact(
+        'membre',
+        'membres',
+        'admin',
+        'tontinesGerees',
+        'cotisations',
+        'tontines',
+        'notifications'
+    ));
+
+}
    public function marquerLu($id)
     {
         $notif = NotificationMembre::find($id);
@@ -118,4 +115,16 @@ public function index()
             'transactions-' . $membre->nom . '.xlsx'
         );
     }
+ public function voirTontines()
+{
+    $membreId = Session::get('membre_id');
+
+    $tontines = \App\Models\Tontine::with(['membresApprouves', 'membres'])->get();
+
+    $tontinesduMembre = \App\Models\Tontine::whereHas('membres', function ($q) use ($membreId) {
+        $q->where('membre_id', $membreId);
+    })->pluck('id')->toArray();
+
+     return view('espace-membre.tontines', compact('tontines', 'tontinesduMembre', 'membreId'));
+}
 }

@@ -255,4 +255,23 @@ class AdminExportController extends Controller
         NotificationAdmin::truncate();
         return $this->redirectRole('Toutes les notifications ont ete supprimees.', 'inscriptions');
     }
+    public function reinitialiserPassword($id)
+{
+    if (Session::get('role') !== 'super_admin') {
+        return redirect('/dashboard')->with('error', 'Action non autorisee.');
+    }
+
+    $membre = Membre::findOrFail($id);
+    $nouveauPassword = 'tontine' . rand(1000, 9999);
+    $membre->update(['password' => bcrypt($nouveauPassword)]);
+
+    NotificationMembre::create([
+        'membre_id' => $membre->id,
+        'titre'     => 'Mot de passe reinitialise',
+        'message'   => 'Votre mot de passe a ete reinitialise par l\'administrateur. Votre nouveau mot de passe est : ' . $nouveauPassword . '. Pensez a le changer une fois connecte.',
+        'lu'        => false,
+    ]);
+
+    return back()->with('success', 'Mot de passe reinitialise pour ' . $membre->prenom . '. Nouveau mot de passe : ' . $nouveauPassword);
+}
 }

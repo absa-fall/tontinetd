@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -37,7 +38,6 @@
         .page-title span { color: var(--green-mid); }
         .badge-date { background: var(--surface); border: 1px solid var(--border); padding: 0.45rem 1rem; border-radius: 999px; font-size: 0.8rem; color: var(--muted); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
 
-        /* Cloche */
         .cloche-wrapper { position: relative; cursor: pointer; }
         .cloche-btn { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text); position: relative; }
         .cloche-count { position: absolute; top: -6px; right: -8px; background: var(--danger); color: #fff; border-radius: 999px; font-size: 0.6rem; padding: 1px 5px; font-weight: 700; min-width: 16px; text-align: center; }
@@ -130,6 +130,7 @@
     <div class="logo-sub">Administration</div>
     <div class="nav-label">Navigation</div>
     <button class="nav-item" onclick="showSection('home', this)">Accueil</button>
+    <a href="/mon-espace" class="nav-item" style="text-decoration:none;">Mon espace membre</a>
     <button class="nav-item" onclick="showSection('inscriptions', this)">
         Inscriptions
         @if(isset($membresEnAttente) && $membresEnAttente->count() > 0)
@@ -165,12 +166,23 @@
         </div>
     </div>
 
-    @if(session('success'))
-    <div class="alert-success">{{ session('success') }}</div>
-    @endif
-    @if(session('error'))
-    <div class="alert-error">{{ session('error') }}</div>
-    @endif
+@if(session('success'))
+<div class="alert-success">{{ session('success') }}</div>
+@endif
+
+@if($errors->any())
+<div class="alert-error">
+    <ul style="margin:0;padding-left:1.2rem;">
+        @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert-error">{{ session('error') }}</div>
+@endif
 
     <div class="stats-grid">
         <div class="stat-card" onclick="showSection('membres', document.querySelectorAll('.nav-item')[2])">
@@ -386,7 +398,7 @@
                                 @if(in_array($m->role, ['admin', 'gerant']))
                                 <form action="/admin/membre/{{ $m->id }}/retirer-role" method="post" onsubmit="return confirm('Retirer le rôle de {{ $m->prenom }} ?')">@csrf<button type="submit" class="btn btn-danger">Retirer rôle</button></form>
                                 @endif
-                                <form action="/membre/{{ $m->id }}" method="post" onsubmit="return confirm('Supprimer ce membre ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
+                                <form action="/membre/{{ $m->id }}" method="post" onsubmit="return confirm('Supprimer ce membre ?')">@csrf @method('DELETE') <button type="submit" class="btn btn-danger">Supprimer</button></form>
                             </div></td>
                         </tr>
                         @endforeach
@@ -420,9 +432,14 @@
                                 <option value="journalier">Journalier</option>
                             </select>
                         </div>
+                        <!-- ✅ CORRECTION BUG 1 : id unique pour le formulaire création -->
+                        <div class="form-group">
+                            <label class="form-label">Nombre max de membres</label>
+                            <input type="number" name="nombre_max_membres" id="et_max_create" class="form-control" min="2" max="500" required>
+                        </div>
                         <div class="form-group">
                             <label class="form-label">Membres bénéficiaires</label>
-                            <select name="membre_ids[]" class="form-control" required>
+                            <select name="membre_ids[]" class="form-control">
                                 <option value="">Choisir un membre</option>
                                 @foreach($membres as $m)
                                 <option value="{{ $m->id }}">{{ $m->prenom }} {{ $m->nom }}</option>
@@ -462,9 +479,9 @@
                             <td><span class="badge badge-yellow">{{ $t->frequence }}</span></td>
                             <td><span class="badge badge-green">{{ $t->membres->count() }} membre(s)</span></td>
                             <td><div class="actions">
-                                <button class="btn btn-profil" onclick="voirMembresTontine({{ $t->id }})">Gérer</button>
-                                <button class="btn btn-edit" onclick="openEditTontine({{ $t->id }},'{{ addslashes($t->nom) }}','{{ addslashes($t->description) }}',{{ $t->montant }},'{{ $t->date_debut }}','{{ $t->date_fin }}','{{ $t->frequence }}')">Modifier</button>
-                                <form action="/tontine/{{ $t->id }}" method="post" onsubmit="return confirm('Supprimer cette tontine ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
+                                <button type="button" class="btn btn-profil" onclick="voirMembresTontine({{ $t->id }})">Gérer</button>
+                                <button type="button" class="btn btn-edit" onclick="openEditTontine({{ $t->id }},'{{ addslashes($t->nom) }}','{{ addslashes($t->description) }}',{{ $t->montant }},'{{ $t->date_debut }}','{{ $t->date_fin }}','{{ $t->frequence }}',{{ $t->nombre_max_membres }})">Modifier</button>
+                                <form action="/tontine/{{ $t->id }}" method="post" onsubmit="return confirm('Supprimer cette tontine ?')">@csrf @method('DELETE') <button type="submit" class="btn btn-danger">Supprimer</button></form>
                             </div></td>
                         </tr>
                         @endforeach
@@ -571,7 +588,7 @@
                             <td>{{ $tour->mode_reception ?? '—' }}</td>
                             <td><div class="actions">
                                 <button class="btn btn-edit" onclick="openEditTour({{ $tour->id }},{{ $tour->tontine_id ?? 0 }},'{{ $tour->date_tour }}','{{ $tour->etat }}')">Modifier</button>
-                                <form action="/tour/{{ $tour->id }}" method="post" onsubmit="return confirm('Supprimer ce tour ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
+                                <form action="/tour/{{ $tour->id }}" method="post" onsubmit="return confirm('Supprimer ce tour ?')">@csrf <button type="submit" class="btn btn-danger">Supprimer</button></form>
                             </div></td>
                         </tr>
                         @endforeach
@@ -642,7 +659,7 @@
                             <td>{{ $c->membre->nom ?? '—' }} {{ $c->membre->prenom ?? '' }}</td>
                             <td><div class="actions">
                                 <button class="btn btn-edit" onclick="openEditCotisation({{ $c->id }},{{ $c->montant }},'{{ $c->date_cotisation }}',{{ $c->membre_id ?? 0 }},{{ $c->tontine_id ?? 0 }})">Modifier</button>
-                                <form action="/cotisation/{{ $c->id }}" method="post" onsubmit="return confirm('Supprimer ?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger">Supprimer</button></form>
+                                <form action="/cotisation/{{ $c->id }}" method="post" onsubmit="return confirm('Supprimer ?')">@csrf <button type="submit" class="btn btn-danger">Supprimer</button></form>
                             </div></td>
                         </tr>
                         @endforeach
@@ -679,6 +696,7 @@
     </div>
 </div>
 
+<!-- ✅ CORRECTION BUG 1 : champ nombre_max_membres ajouté dans le modal modification -->
 <div class="modal-overlay" id="modalTontine">
     <div class="modal">
         <div class="modal-title">Modifier la tontine</div>
@@ -695,6 +713,11 @@
                         <option value="mensuelle">Mensuelle</option>
                         <option value="journalier">Journalier</option>
                     </select>
+                </div>
+                <!-- ✅ Champ manquant ajouté ici -->
+                <div class="form-group">
+                    <label class="form-label">Nombre max de membres</label>
+                    <input type="number" name="nombre_max_membres" id="et_max_modal" class="form-control" min="2" max="500" required>
                 </div>
             </div>
             <div class="modal-actions">
@@ -813,7 +836,8 @@
         document.getElementById('modalMembre').classList.add('open');
     }
 
-    function openEditTontine(id, nom, desc, montant, debut, fin, freq) {
+    // ✅ CORRECTION BUG 1 : utilise et_max_modal (dans le modal) au lieu de et_max
+    function openEditTontine(id, nom, desc, montant, debut, fin, freq, max) {
         document.getElementById('formEditTontine').action = '/tontine/' + id;
         document.getElementById('et_nom').value = nom;
         document.getElementById('et_desc').value = desc;
@@ -821,6 +845,7 @@
         document.getElementById('et_debut').value = debut;
         document.getElementById('et_fin').value = fin;
         document.getElementById('et_freq').value = freq;
+        document.getElementById('et_max_modal').value = max; // ✅ corrigé
         document.getElementById('modalTontine').classList.add('open');
     }
 
@@ -864,14 +889,14 @@
                     <td>${m.nom}</td>
                     <td>${m.prenom}</td>
                     <td>${m.email}</td>
-                    <td><span class="badge ${isAdmin ? 'badge-green' : 'badge-yellow'}">${isAdmin ? 'Admin' : 'Membre'}</span></td>
-                    <td>
-                        <div class="actions">
-                            ${!isAdmin ? `
-                            <form action="/admin/tontine/${tontineId}/membre/${m.id}/rendre-admin" method="post" onsubmit="return confirm('Rendre ${m.prenom} admin ?')">
-                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="btn btn-gold">Rendre admin</button>
-                            </form>` : `<span style="font-size:0.78rem;color:var(--muted);">Admin actuel</span>`}
+                   <td><span class="badge ${isAdmin ? 'badge-green' : 'badge-yellow'}">${isAdmin ? 'Gerant' : 'Membre'}</span></td>
+<td>
+    <div class="actions">
+        ${!isAdmin ? `
+        <form action="/admin/tontine/${tontineId}/membre/${m.id}/rendre-admin" method="post" onsubmit="return confirm('Rendre ${m.prenom} gerant de cette tontine ?')">
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-gold">Rendre gerant</button>
+        </form>` : `<span style="font-size:0.78rem;color:var(--muted);">Gerant actuel</span>`}
                             <form action="/tontine/${tontineId}/membre/${m.id}" method="post" onsubmit="return confirm('Retirer ce membre ?')">
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="_method" value="DELETE">
@@ -911,10 +936,18 @@
     const topMembres = Object.entries(cotisParMembre).sort((a,b) => b[1]-a[1]).slice(0,6);
     const couleursDonut = ['#0d3d2b','#1a6645','#2d9e68','#3ecf8e','#f0a500','#ffd166'];
 
+    // ✅ CORRECTION BUG 2 : min: 0 pour éviter les valeurs négatives sur l'axe Y
     new Chart(document.getElementById('chartLigne'), {
         type: 'line',
         data: { labels: moisLabels, datasets: [{ label: 'Total collecté (F CFA)', data: cumulParMois, borderColor: '#1a6645', backgroundColor: 'rgba(26,102,69,0.08)', borderWidth: 2.5, fill: true, tension: 0.4, pointBackgroundColor: '#1a6645', pointRadius: 4 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#e2ece8' }, ticks: { color: '#6b8c7a', font: { size: 11 } } }, y: { grid: { color: '#e2ece8' }, ticks: { color: '#6b8c7a', font: { size: 11 }, callback: v => v.toLocaleString('fr') + ' F' } } } }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: {
+            x: { grid: { color: '#e2ece8' }, ticks: { color: '#6b8c7a', font: { size: 11 } } },
+            y: {
+                min: 0, // ✅ corrigé : force l'axe Y à démarrer à 0
+                grid: { color: '#e2ece8' },
+                ticks: { color: '#6b8c7a', font: { size: 11 }, callback: v => v.toLocaleString('fr') + ' F' }
+            }
+        }}
     });
 
     new Chart(document.getElementById('chartBarres'), {

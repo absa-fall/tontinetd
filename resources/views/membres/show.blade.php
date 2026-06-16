@@ -114,6 +114,18 @@
                 <span>{{ \Carbon\Carbon::parse($membre->created_at)->format('d/m/Y') }}</span>
             </div>
         </div>
+        @if(session('success'))
+<div style="background:var(--success-light);color:var(--green-mid);border:1px solid rgba(26,102,69,0.2);padding:0.8rem 1.2rem;border-radius:10px;margin-top:1.5rem;font-size:0.9rem;">
+    {{ session('success') }}
+</div>
+@endif
+
+<div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border);">
+    <form action="/admin/membre/{{ $membre->id }}/reinitialiser-password" method="post" onsubmit="return confirm('Reinitialiser le mot de passe de {{ $membre->prenom }} ? Un nouveau mot de passe sera genere et envoye par notification.')">
+        @csrf
+        <button type="submit" class="btn btn-danger">Reinitialiser le mot de passe</button>
+    </form>
+</div>
     </div>
 
     <div class="stats-grid">

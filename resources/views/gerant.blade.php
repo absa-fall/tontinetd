@@ -158,12 +158,7 @@
     </div>
     <div class="nav-label">Navigation</div>
     <button class="nav-item active" onclick="showSection('home', this)">Accueil</button>
-    <button class="nav-item" onclick="showSection('inscriptions', this)">
-        Inscriptions
-        @if($membresEnAttente->count() > 0)
-        <span class="notif-badge">{{ $membresEnAttente->count() }}</span>
-        @endif
-    </button>
+    <a href="/mon-espace" class="nav-item" style="text-decoration:none;">Mon espace membre</a>
     <button class="nav-item" onclick="showSection('membres', this)">Membres</button>
     <button class="nav-item" onclick="showSection('tontines', this)">Tontines</button>
     <button class="nav-item" onclick="showSection('cotisations', this)">Cotisations</button>
@@ -207,7 +202,15 @@
     @if(session('error'))
     <div class="alert-error">{{ session('error') }}</div>
     @endif
-
+@if($errors->any())
+<div class="alert-error">
+    <ul style="margin:0;padding-left:1.2rem;">
+        @foreach($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
     <div class="stats-grid">
         <div class="stat-card" onclick="showSection('membres', document.querySelectorAll('.nav-item')[2])">
             <div class="stat-label">Membres</div>
@@ -256,62 +259,7 @@
         </div>
     </div>
 
-    <!-- INSCRIPTIONS -->
-    <div class="section" id="section-inscriptions">
-        <div class="panel">
-            <div class="panel-header">
-                <div class="panel-title">Membres en attente de validation</div>
-                <div class="btn-group">
-                    <span class="badge badge-yellow">{{ $membresEnAttente->count() }} en attente</span>
-                    @if($membresEnAttente->count() > 0)
-                    <form action="/admin/membres/approuver-tout" method="post" onsubmit="return confirm('Approuver tous ?')">
-                        @csrf
-                        <button type="submit" class="btn btn-profil">Approuver tout</button>
-                    </form>
-                    <form action="/admin/membres/refuser-tout" method="post" onsubmit="return confirm('Refuser tous ?')">
-                        @csrf
-                        <button type="submit" class="btn btn-danger">Refuser tout</button>
-                    </form>
-                    @endif
-                </div>
-            </div>
-            <div class="table-wrap">
-                @if($membresEnAttente->count() > 0)
-                <table>
-                    <thead>
-                        <tr><th>#</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Inscrit le</th><th>Actions</th></tr>
-                    </thead>
-                    <tbody>
-                        @foreach($membresEnAttente as $m)
-                        <tr>
-                            <td>#{{ $m->id }}</td>
-                            <td>{{ $m->nom }}</td>
-                            <td>{{ $m->prenom }}</td>
-                            <td>{{ $m->email }}</td>
-                            <td>{{ $m->telephone }}</td>
-                            <td>{{ \Carbon\Carbon::parse($m->created_at)->format('d/m/Y à H:i') }}</td>
-                            <td>
-                                <div class="actions">
-                                    <form action="/admin/membre/{{ $m->id }}/approuver" method="post" onsubmit="return confirm('Approuver ?')">
-                                        @csrf
-                                        <button type="submit" class="btn btn-profil">Approuver</button>
-                                    </form>
-                                    <form action="/admin/membre/{{ $m->id }}/refuser" method="post" onsubmit="return confirm('Refuser ?')">
-                                        @csrf
-                                        <button type="submit" class="btn btn-danger">Refuser</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                @else
-                <div class="empty">Aucune inscription en attente.</div>
-                @endif
-            </div>
-        </div>
-    </div>
+    
 
     <!-- MEMBRES -->
     <div class="section" id="section-membres">
@@ -416,6 +364,10 @@
                                 <option value="journalier">Journalier</option>
                             </select>
                         </div>
+                        <div class="form-group">
+    <label class="form-label">Nombre max de membres</label>
+    <input type="number" name="nombre_max_membres" class="form-control" min="2" max="500" value="10" required>
+</div>
                         <div class="form-group">
                             <label class="form-label">Membres bénéficiaires</label>
                             <select name="membre_ids[]" class="form-control" required>
@@ -892,7 +844,7 @@
 
     const titles = {
         home: 'Tableau de <span>bord</span>',
-        inscriptions: 'Inscriptions en <span>attente</span>',
+       
         membres: 'Gestion des <span>membres</span>',
         tontines: 'Gestion des <span>tontines</span>',
         cotisations: 'Gestion des <span>cotisations</span>',

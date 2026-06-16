@@ -84,10 +84,10 @@
             <div class="stat-label">Montant</div>
             <div class="stat-value">{{ number_format($tontine->montant, 0, ',', ' ') }} F</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-label">Membres</div>
-            <div class="stat-value">{{ $tontine->membres->count() }}</div>
-        </div>
+       <div class="stat-card">
+    <div class="stat-label">Membres</div>
+    <div class="stat-value">{{ $tontine->membresApprouves->count() }}</div>
+</div>
         <div class="stat-card">
             <div class="stat-label">Tours effectués</div>
             <div class="stat-value">{{ $nbToursTermines }} / {{ $tontine->tours->count() }}</div>
@@ -98,9 +98,46 @@
         </div>
     </div>
 
-    <div class="panel">
-        <div class="panel-header">
-            <div class="panel-title">Membres</div>
+    <div class="panel-title">Membres</div>
+<span class="badge badge-green">{{ $tontine->membresApprouves->count() }} membre(s)</span>
+            <!-- DEMANDES EN ATTENTE -->
+@if($tontine->demandesEnAttente->count() > 0)
+<div class="panel">
+    <div class="panel-header">
+        <div class="panel-title">Demandes d'adhésion en attente</div>
+        <span class="badge badge-yellow">{{ $tontine->demandesEnAttente->count() }} en attente</span>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                @foreach($tontine->demandesEnAttente as $m)
+                <tr>
+                    <td>{{ $m->nom }}</td>
+                    <td>{{ $m->prenom }}</td>
+                    <td>{{ $m->email }}</td>
+                    <td>{{ $m->telephone }}</td>
+                    <td>
+                        <div class="actions">
+                            <form action="/tontine/{{ $tontine->id }}/membre/{{ $m->id }}/approuver-demande" method="post" onsubmit="return confirm('Approuver {{ $m->prenom }} ?')">
+                                @csrf
+                                <button type="submit" class="btn btn-profil">Approuver</button>
+                            </form>
+                            <form action="/tontine/{{ $tontine->id }}/membre/{{ $m->id }}/refuser-demande" method="post" onsubmit="return confirm('Refuser {{ $m->prenom }} ?')">
+                                @csrf
+                                <button type="submit" class="btn btn-danger">Refuser</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
 
             {{-- ✅ Formulaire d'ajout de membre (gérant + super admin) --}}
             @if($membresDisponibles->count() > 0)
@@ -117,11 +154,11 @@
             @endif
         </div>
 
-        @if($tontine->membres->count() > 0)
+       @if($tontine->membresApprouves->count() > 0)
         <table>
             <thead><tr><th>Nom</th><th>Prénom</th><th>Email</th><th>Rôle</th><th>Action</th></tr></thead>
             <tbody>
-                @foreach($tontine->membres as $m)
+                @foreach($tontine->membresApprouves as $m)
                 <tr>
                     <td>{{ $m->nom }}</td>
                     <td>{{ $m->prenom }}</td>
@@ -150,7 +187,6 @@
         <div class="empty">Aucun membre.</div>
         @endif
     </div>
-
     <div class="panel">
         <div class="panel-header"><div class="panel-title">Tours</div></div>
         @if($tontine->tours->count() > 0)

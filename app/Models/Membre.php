@@ -42,13 +42,13 @@ class Membre extends Model
         return $this->hasMany(NotificationAdmin::class);
     }
 
-    public function tontines()
-    {
-        return $this->belongsToMany(Tontine::class, 'membre_tontine')
-                    ->withPivot('role')
-                    ->withTimestamps();
-    }
-
+   // Membre.php — remplace la relation tontines par :
+public function tontines()
+{
+    return $this->belongsToMany(Tontine::class, 'membre_tontine')
+                ->withPivot('role', 'statut')  // ajouter 'statut'
+                ->withTimestamps();
+}
     public function isGerant()
     {
         return $this->role === 'gerant';

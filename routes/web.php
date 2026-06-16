@@ -64,6 +64,7 @@ Route::middleware('role:super_admin')->group(function () {
     Route::post('/admin/membre/{id}/rendre-gerant',[AdminExportController::class, 'rendreGerant']);
     Route::post('/admin/membre/{id}/retirer-role', [AdminExportController::class, 'retirerRole']);
     Route::post('/admin/tontine/{tontineId}/membre/{membreId}/rendre-admin', [AdminExportController::class, 'rendreAdminTontine']);
+    Route::post('/admin/membre/{id}/reinitialiser-password', [AdminExportController::class, 'reinitialiserPassword']);
 });
 
 // -----------------------------------------------
@@ -75,6 +76,11 @@ Route::middleware('role:gerant,admin,super_admin')->group(function () {
     Route::post('/gerant/notif/{id}/lu', [GerantController::class, 'marquerLu']);
 Route::post('/gerant/notifs/marquer-tout-lu', [GerantController::class, 'marquerToutLu']);
 Route::post('/gerant/notifs/supprimer-tout', [GerantController::class, 'supprimerToutNotifs']);
+Route::post('/tontine/{tontineId}/demande/{membreId}/approuver', [ControlleurTontine::class, 'approuverDemande']);
+Route::post('/tontine/{tontineId}/demande/{membreId}/refuser',   [ControlleurTontine::class, 'refuserDemande']);
+Route::post('/tontine/{tontineId}/membre/{membreId}/approuver-demande', [ControlleurTontine::class, 'approuverDemande']);
+Route::post('/tontine/{tontineId}/membre/{membreId}/refuser-demande', [ControlleurTontine::class, 'refuserDemande']);
+
 
     // Membres
     Route::post('/membre',      [ControlleurMembre::class, 'store']);
@@ -125,4 +131,6 @@ Route::middleware('role:membre,gerant,admin,super_admin')->group(function () {
     Route::post('/mon-espace/notifs/marquer-tout-lu',    [EspaceMembreController::class, 'marquerToutLu']);
     Route::post('/mon-espace/notifs/supprimer-tout',     [EspaceMembreController::class, 'supprimerToutNotifs']);
     Route::post('/mon-espace/notifs/supprimer-selection',[EspaceMembreController::class, 'supprimerSelectionNotifs']);
+    Route::post('/tontine/{tontineId}/demander-adhesion', [ControlleurTontine::class, 'demanderAdhesion']);
 });
+Route::get('/tontines/publiques', [EspaceMembreController::class, 'voirTontines']);
