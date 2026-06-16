@@ -266,8 +266,11 @@
                 <input type="password" name="password" class="form-control" placeholder="••••••••" required>
             </div>
             <button type="submit" class="btn-submit">Se connecter</button>
-        </form>
+</form>
 
+<div style="text-align:center;margin-top:1.2rem;font-size:0.85rem;">
+    Mot de passe oublié ? <a href="/#contact" style="color:var(--green-mid);font-weight:600;text-decoration:none;">Voir les contacts de l'administrateur</a>
+</div>
         <div class="form-footer">
             Pas encore de compte ? <a href="/register">S'inscrire</a>
         </div>
