@@ -153,16 +153,25 @@
     <div class="logo"><div class="logo-icon">T</div>TontineTD</div>
     <div class="logo-sub">Espace Gérant</div>
     <div class="gerant-info">
-        <div class="gerant-badge">Gérant</div>
-        <div class="gerant-name">{{ $gerant->prenom }} {{ $gerant->nom }}</div>
-    </div>
+    <div class="gerant-badge">{{ $gerant->role === 'admin' ? 'Admin' : 'Gerant' }}</div>
+    <div class="gerant-name">{{ $gerant->prenom }} {{ $gerant->nom }}</div>
+</div>
     <div class="nav-label">Navigation</div>
     <button class="nav-item active" onclick="showSection('home', this)">Accueil</button>
-    <a href="/mon-espace" class="nav-item" style="text-decoration:none;">Mon espace membre</a>
-    <button class="nav-item" onclick="showSection('membres', this)">Membres</button>
+<a href="/mon-espace" class="nav-item" style="text-decoration:none;">Mon espace membre</a>
+@if($gerant->role === 'admin')
+<button class="nav-item" onclick="showSection('inscriptions', this)">
+    Inscriptions
+    @if($membresEnAttente->count() > 0)
+    <span class="notif-badge">{{ $membresEnAttente->count() }}</span>
+    @endif
+</button>
+@endif
+<button class="nav-item" onclick="showSection('membres', this)">Membres</button>
     <button class="nav-item" onclick="showSection('tontines', this)">Tontines</button>
-    <button class="nav-item" onclick="showSection('cotisations', this)">Cotisations</button>
     <button class="nav-item" onclick="showSection('tours', this)">Tours</button>
+    <button class="nav-item" onclick="showSection('cotisations', this)">Cotisations</button>
+    
    <button class="nav-item" onclick="showSection('notifications', this)">
     Notifications
     @if($notifsNonLues > 0)
@@ -232,10 +241,14 @@
 
     <!-- HOME -->
     <div class="section active" id="section-home">
-        <div class="privilege-box">
-            <strong>Vos privilèges de gérant</strong>
-            Vous pouvez gérer les membres, tontines, cotisations, tours et approuver les inscriptions. Vous ne pouvez pas supprimer un membre ni voir son profil détaillé.
-        </div>
+       <div class="privilege-box">
+    <strong>{{ $gerant->role === 'admin' ? 'Vos privileges d\'admin' : 'Vos privileges de gerant' }}</strong>
+    @if($gerant->role === 'admin')
+        Vous pouvez gerer les membres, tontines, cotisations, tours et approuver les inscriptions. Vous ne pouvez pas supprimer un membre ni voir son profil detaille.
+    @else
+        Vous pouvez gerer les membres, tontines, cotisations et tours. Vous ne pouvez pas approuver les inscriptions, supprimer un membre ni voir son profil detaille.
+    @endif
+</div>
         <div class="panel">
             <div class="panel-header"><div class="panel-title">Résumé</div></div>
             <div class="panel-body" style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
@@ -327,6 +340,64 @@
             </div>
         </div>
     </div>
+@if($gerant->role === 'admin')
+<!-- INSCRIPTIONS -->
+<div class="section" id="section-inscriptions">
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">Membres en attente de validation</div>
+            <div class="btn-group">
+                <span class="badge badge-yellow">{{ $membresEnAttente->count() }} en attente</span>
+                @if($membresEnAttente->count() > 0)
+                <form action="/admin/membres/approuver-tout" method="post" onsubmit="return confirm('Approuver tous ?')">
+                    @csrf
+                    <button type="submit" class="btn btn-profil">Approuver tout</button>
+                </form>
+                <form action="/admin/membres/refuser-tout" method="post" onsubmit="return confirm('Refuser tous ?')">
+                    @csrf
+                    <button type="submit" class="btn btn-danger">Refuser tout</button>
+                </form>
+                @endif
+            </div>
+        </div>
+        <div class="table-wrap">
+            @if($membresEnAttente->count() > 0)
+            <table>
+                <thead>
+                    <tr><th>#</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Inscrit le</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    @foreach($membresEnAttente as $m)
+                    <tr>
+                        <td>#{{ $m->id }}</td>
+                        <td>{{ $m->nom }}</td>
+                        <td>{{ $m->prenom }}</td>
+                        <td>{{ $m->email }}</td>
+                        <td>{{ $m->telephone }}</td>
+                        <td>{{ \Carbon\Carbon::parse($m->created_at)->format('d/m/Y a H:i') }}</td>
+                        <td>
+                            <div class="actions">
+                                <form action="/admin/membre/{{ $m->id }}/approuver" method="post" onsubmit="return confirm('Approuver ?')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-profil">Approuver</button>
+                                </form>
+                                <form action="/admin/membre/{{ $m->id }}/refuser" method="post" onsubmit="return confirm('Refuser ?')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-danger">Refuser</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @else
+            <div class="empty">Aucune inscription en attente.</div>
+            @endif
+        </div>
+    </div>
+</div>
+@endif
 
     <!-- TONTINES -->
     <div class="section" id="section-tontines">
@@ -697,21 +768,27 @@
                     </div>
                 </div>
                 <a href="mailto:{{ $admin->email }}" class="contact-item">
-                    <div class="contact-icon" style="background:var(--success-light);color:var(--green-mid);">✉</div>
+                    <div class="contact-icon" style="background:var(--success-light);color:var(--green-mid);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    </div>
                     <div>
                         <div class="contact-label">Email</div>
                         <div class="contact-value">{{ $admin->email }}</div>
                     </div>
                 </a>
                 <a href="tel:{{ $admin->telephone }}" class="contact-item">
-                    <div class="contact-icon" style="background:var(--wave-light);color:var(--wave);">📞</div>
+                    <div class="contact-icon" style="background:var(--wave-light);color:var(--wave);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.38 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.81a16 16 0 0 0 6 6l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    </div>
                     <div>
                         <div class="contact-label">Téléphone</div>
                         <div class="contact-value">{{ $admin->telephone }}</div>
                     </div>
                 </a>
                 <a href="https://wa.me/{{ preg_replace('/\s+/', '', $admin->telephone) }}" target="_blank" class="contact-item">
-                    <div class="contact-icon" style="background:#e8fdf2;color:#25d366;">💬</div>
+                    <div class="contact-icon" style="background:#e8fdf2;color:#25d366;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
                     <div>
                         <div class="contact-label">WhatsApp</div>
                         <div class="contact-value">{{ $admin->telephone }}</div>
@@ -844,7 +921,7 @@
 
     const titles = {
         home: 'Tableau de <span>bord</span>',
-       
+       inscriptions: 'Inscriptions en <span>attente</span>',
         membres: 'Gestion des <span>membres</span>',
         tontines: 'Gestion des <span>tontines</span>',
         cotisations: 'Gestion des <span>cotisations</span>',

@@ -77,12 +77,7 @@
 </aside>
 
 <main class="main">
-    <pre style="background:#fff;padding:1rem;font-size:0.75rem;">
-{{ $tontines->count() }} tontines trouvées
-@foreach($tontines as $t)
-  - {{ $t->nom }} | statut: {{ $t->statut ?? 'null' }} | type: {{ $t->type ?? 'null' }}
-@endforeach
-</pre>
+   
     <div class="topbar">
         <div class="page-title">Tontines <span>disponibles</span></div>
     </div>

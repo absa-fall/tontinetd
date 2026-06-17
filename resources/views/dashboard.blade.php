@@ -455,42 +455,35 @@
             <div class="panel-header">
                 <div class="panel-title">Liste des tontines</div>
                 <div class="btn-group">
-                    <form action="/tontines/supprimer-tout" method="post" onsubmit="return confirm('Supprimer toutes les tontines ?')">
-                        @csrf
-                        <button type="submit" class="btn btn-danger">Supprimer tout</button>
-                    </form>
-                </div>
-            </div>
-            <div class="table-wrap">
-                <form action="/tontines/supprimer-selection" method="post" id="formSelectionTontines">
-                    @csrf
-                <table>
-                    <thead><tr><th></th><th>ID</th><th>Nom</th><th>Description</th><th>Montant</th><th>Début</th><th>Fin</th><th>Fréquence</th><th>Membres</th><th>Actions</th></tr></thead>
-                    <tbody>
-                        @foreach($tontines as $t)
-                        <tr>
-                            <td><input type="checkbox" name="tontine_ids[]" value="{{ $t->id }}"></td>
-                            <td>#{{ $t->id }}</td>
-                            <td>{{ $t->nom }}</td>
-                            <td>{{ $t->description }}</td>
-                            <td>{{ number_format($t->montant, 0, ',', ' ') }} F</td>
-                            <td>{{ $t->date_debut }}</td>
-                            <td>{{ $t->date_fin }}</td>
-                            <td><span class="badge badge-yellow">{{ $t->frequence }}</span></td>
-                            <td><span class="badge badge-green">{{ $t->membres->count() }} membre(s)</span></td>
-                            <td><div class="actions">
-                                <button type="button" class="btn btn-profil" onclick="voirMembresTontine({{ $t->id }})">Gérer</button>
-                                <button type="button" class="btn btn-edit" onclick="openEditTontine({{ $t->id }},'{{ addslashes($t->nom) }}','{{ addslashes($t->description) }}',{{ $t->montant }},'{{ $t->date_debut }}','{{ $t->date_fin }}','{{ $t->frequence }}',{{ $t->nombre_max_membres }})">Modifier</button>
-                                <form action="/tontine/{{ $t->id }}" method="post" onsubmit="return confirm('Supprimer cette tontine ?')">@csrf @method('DELETE') <button type="submit" class="btn btn-danger">Supprimer</button></form>
-                            </div></td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                <div style="padding:1rem 1.5rem;">
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer les tontines sélectionnées ?')">Supprimer la sélection</button>
-                </div>
-                </form>
+                  <table>
+    <thead><tr><th></th><th>ID</th><th>Nom</th><th>Description</th><th>Montant</th><th>Début</th><th>Fin</th><th>Fréquence</th><th>Membres</th><th>Actions</th></tr></thead>
+    <tbody>
+        @foreach($tontines as $t)
+        <tr>
+            <td><input type="checkbox" form="formSelectionTontines" name="tontine_ids[]" value="{{ $t->id }}"></td>
+            <td>#{{ $t->id }}</td>
+            <td>{{ $t->nom }}</td>
+            <td>{{ $t->description }}</td>
+            <td>{{ number_format($t->montant, 0, ',', ' ') }} F</td>
+            <td>{{ $t->date_debut }}</td>
+            <td>{{ $t->date_fin }}</td>
+            <td><span class="badge badge-yellow">{{ $t->frequence }}</span></td>
+            <td><span class="badge badge-green">{{ $t->membres->count() }} membre(s)</span></td>
+            <td><div class="actions">
+                <button type="button" class="btn btn-profil" onclick="voirMembresTontine({{ $t->id }})">Gérer</button>
+                <button type="button" class="btn btn-edit" onclick="openEditTontine({{ $t->id }},'{{ addslashes($t->nom) }}','{{ addslashes($t->description) }}',{{ $t->montant }},'{{ $t->date_debut }}','{{ $t->date_fin }}','{{ $t->frequence }}',{{ $t->nombre_max_membres }})">Modifier</button>
+                <form action="/tontine/{{ $t->id }}" method="post" onsubmit="return confirm('Supprimer cette tontine ?')">@csrf @method('DELETE') <button type="submit" class="btn btn-danger">Supprimer</button></form>
+            </div></td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
+<form action="/tontines/supprimer-selection" method="post" id="formSelectionTontines">
+    @csrf
+    <div style="padding:1rem 1.5rem;">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer les tontines sélectionnées ?')">Supprimer la sélection</button>
+    </div>
+</form>
             </div>
         </div>
 

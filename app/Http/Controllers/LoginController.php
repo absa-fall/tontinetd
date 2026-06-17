@@ -31,13 +31,20 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
-        // Vérifier si c'est l'admin
-        if ($request->email === 'admin@tontinetd.sn' && $request->password === 'TontineTD@2026') {
-            Session::forget(['membre_id', 'membre_nom']);
-            Session::put('is_admin', true);
-            Session::put('role', 'super_admin');
-            return redirect('/dashboard');
-        }
+       // Vérifier si c'est l'admin
+if ($request->email === 'admin@tontinetd.sn' && $request->password === 'TontineTD@2026') {
+    $superAdminMembre = Membre::where('email', 'admin@tontinetd.sn')->first();
+
+    Session::put('is_admin', true);
+    Session::put('role', 'super_admin');
+
+    if ($superAdminMembre) {
+        Session::put('membre_id', $superAdminMembre->id);
+        Session::put('membre_nom', $superAdminMembre->nom . ' ' . $superAdminMembre->prenom);
+    }
+
+    return redirect('/dashboard');
+}
 
         // Sinon vérifier membre
         $membre = Membre::where('email', $request->email)->first();

@@ -157,9 +157,12 @@
     <div class="membre-info">
         <div class="membre-name">{{ $membre->nom }} {{ $membre->prenom }}</div>
         <div class="membre-email">{{ $membre->email }}</div>
-    </div>
-    <div class="nav-label">Menu</div>
-    <button class="nav-item active" onclick="showSection('accueil', this)">Accueil</button>
+</div>
+<div class="nav-label">Menu</div>
+@if(Session::get('role') === 'super_admin')
+<a href="/dashboard" class="nav-item" style="text-decoration:none;">Retour au dashboard</a>
+@endif
+<button class="nav-item active" onclick="showSection('accueil', this)">Accueil</button>
    <button class="nav-item" onclick="showSection('tontines', this)">Mes tontines</button>
    <a href="/tontines/publiques" class="nav-item" style="text-decoration:none;">Tontines disponibles</a>
     <button class="nav-item" onclick="showSection('tours', this)">Tours</button>
@@ -757,10 +760,35 @@
                         <div style="font-size:0.78rem;color:var(--muted);">Administrateur TontineTD</div>
                     </div>
                 </div>
+<a href="mailto:{{ $admin->email }}" class="contact-item">
+    <div class="contact-icon" style="background:var(--success-light);color:var(--green-mid);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+    </div>
+    <div>
+        <div class="contact-label">Email</div>
+        <div class="contact-value">{{ $admin->email }}</div>
+    </div>
+</a>
 
-                <a href="mailto:{{ $admin->email }}" class="contact-item">
-                    <div class="contact-icon" style="background:var(--success-light);color:var(--green-mid);" > </div>
-                    <div>
+<a href="tel:{{ $admin->telephone }}" class="contact-item">
+    <div class="contact-icon" style="background:var(--wave-light);color:var(--wave);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.38 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.81a16 16 0 0 0 6 6l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    </div>
+    <div>
+        <div class="contact-label">Téléphone</div>
+        <div class="contact-value">{{ $admin->telephone }}</div>
+    </div>
+</a>
+
+<a href="https://wa.me/{{ preg_replace('/\s+/', '', $admin->telephone) }}" target="_blank" class="contact-item">
+    <div class="contact-icon" style="background:#e8fdf2;color:#25d366;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div>
+        <div class="contact-label">WhatsApp</div>
+        <div class="contact-value">{{ $admin->telephone }}</div>
+    </div>
+</a>
                         <div class="contact-label">Email</div>
                         <div class="contact-value">{{ $admin->email }}</div>
                     </div>

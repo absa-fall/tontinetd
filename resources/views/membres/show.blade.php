@@ -56,7 +56,9 @@
         tbody tr:last-child td { border-bottom: none; }
         tbody tr:hover td { background: #f0f7f3; }
         .empty { padding: 2rem; text-align: center; color: var(--muted); font-size: 0.9rem; }
-
+.btn { padding: 0.6rem 1.4rem; border-radius: 8px; border: none; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+.btn-danger { background: var(--danger-light); color: var(--danger); border: 1px solid rgba(224,82,82,0.2); }
+.btn-danger:hover { background: var(--danger); color: #fff; }
         .badge { padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; display: inline-block; }
         .badge-lu { background: var(--success-light); color: var(--green-mid); border: 1px solid rgba(26,102,69,0.2); }
         .badge-nonlu { background: var(--danger-light); color: var(--danger); border: 1px solid rgba(224,82,82,0.2); }
