@@ -54,19 +54,20 @@ class ControlleurTontine extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nom'                 => 'required|string|max:255',
-            'description'         => 'required|string',
-            'date_debut'          => 'required|date',
-            'date_fin'            => 'required|date|after:date_debut',
-            'montant'             => 'required|numeric|min:1',
-            'frequence'           => 'required|in:semaine,mensuelle,journalier',
-            'nombre_max_membres'  => 'required|integer|min:2|max:500',
-        ]);
+    'nom'                 => 'required|string|max:255',
+    'description'         => 'required|string',
+    'date_debut'          => 'required|date',
+    'date_fin'            => 'required|date|after:date_debut',
+    'montant'             => 'required|numeric|min:1',
+    'frequence'           => 'required|in:semaine,mensuelle,journalier',
+    'nombre_max_membres'  => 'required|integer|min:2|max:500',
+    'lien_whatsapp'       => 'nullable|url',
+]);
 
-        $tontine = Tontine::create($request->only([
-            'nom', 'description', 'date_debut', 'date_fin',
-            'montant', 'frequence', 'nombre_max_membres',
-        ]));
+$tontine = Tontine::create($request->only([
+    'nom', 'description', 'date_debut', 'date_fin',
+    'montant', 'frequence', 'nombre_max_membres', 'lien_whatsapp',
+]));
 
         // Attacher le gérant créateur comme admin de la tontine
         $adminId = Session::get('membre_id');
@@ -78,22 +79,28 @@ class ControlleurTontine extends Controller
         }
 
         // Attacher les membres sélectionnés (directement approuvés par le gérant)
-        $membreIds = $request->input('membre_ids', []);
-        foreach ($membreIds as $membreId) {
-            if ($membreId != $adminId) {
-                $tontine->membres()->attach($membreId, [
-                    'role'   => 'membre',
-                    'statut' => 'approuve',
-                ]);
-                NotificationMembre::create([
-                    'membre_id' => $membreId,
-                    'titre'     => 'Ajout à une tontine',
-                    'message'   => 'Vous avez été ajouté à la tontine "' . $tontine->nom . '".',
-                    'lu'        => false,
-                ]);
-            }
+$membreIds = $request->input('membre_ids', []);
+foreach ($membreIds as $membreId) {
+    if ($membreId != $adminId) {
+        $tontine->membres()->attach($membreId, [
+            'role'   => 'membre',
+            'statut' => 'approuve',
+        ]);
+
+        // Message avec lien WhatsApp si disponible
+        $message = 'Vous avez été ajouté à la tontine "' . $tontine->nom . '".';
+        if ($tontine->lien_whatsapp) {
+            $message .= ' Rejoignez le groupe WhatsApp : ' . $tontine->lien_whatsapp;
         }
 
+        NotificationMembre::create([
+            'membre_id' => $membreId,
+            'titre'     => 'Ajout à une tontine',
+            'message'   => $message,
+            'lu'        => false,
+        ]);
+    }
+}
         // Notifier tous les autres membres qu'une tontine existe
         $membresNonAjoutes = Membre::where('statut', 'approuve')
             ->whereNotIn('id', array_merge($membreIds, [$adminId]))
@@ -121,15 +128,16 @@ class ControlleurTontine extends Controller
     // -----------------------------------------------
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'nom'                => 'required|string|max:255',
-            'description'        => 'required|string',
-            'date_debut'         => 'required|date',
-            'date_fin'           => 'required|date|after:date_debut',
-            'montant'            => 'required|numeric|min:1',
-            'frequence'          => 'required|in:semaine,mensuelle,journalier',
-            'nombre_max_membres' => 'required|integer|min:2|max:500',
-        ]);
+       $request->validate([
+    'nom'                => 'required|string|max:255',
+    'description'        => 'required|string',
+    'date_debut'         => 'required|date',
+    'date_fin'           => 'required|date|after:date_debut',
+    'montant'            => 'required|numeric|min:1',
+    'frequence'          => 'required|in:semaine,mensuelle,journalier',
+    'nombre_max_membres' => 'required|integer|min:2|max:500',
+    'lien_whatsapp'      => 'nullable|url',
+]);
 
         $tontine = Tontine::findOrFail($id);
 
@@ -140,10 +148,9 @@ class ControlleurTontine extends Controller
         }
 
         $tontine->update($request->only([
-            'nom', 'description', 'date_debut', 'date_fin',
-            'montant', 'frequence', 'nombre_max_membres',
-        ]));
-
+    'nom', 'description', 'date_debut', 'date_fin',
+    'montant', 'frequence', 'nombre_max_membres', 'lien_whatsapp',
+]));
         $this->notifierAdmin(
             'Tontine modifiée',
             Session::get('membre_nom') . ' a modifié la tontine "' . $tontine->nom . '".'
@@ -298,26 +305,32 @@ class ControlleurTontine extends Controller
     // -----------------------------------------------
     // APPROUVER UNE DEMANDE (gérant/admin/super_admin)
     // -----------------------------------------------
-    public function approuverDemande($tontineId, $membreId)
-    {
-        $tontine = Tontine::findOrFail($tontineId);
+   public function approuverDemande($tontineId, $membreId)
+{
+    $tontine = Tontine::findOrFail($tontineId);
 
-        // Vérifier à nouveau la limite avant d'approuver
-        if ($tontine->estPleine()) {
-            return back()->with('error', 'La tontine est pleine. Impossible d\'approuver.');
-        }
-
-        $tontine->membres()->updateExistingPivot($membreId, ['statut' => 'approuve']);
-
-        NotificationMembre::create([
-            'membre_id' => $membreId,
-            'titre'     => 'Demande acceptée',
-            'message'   => 'Votre demande pour rejoindre la tontine "' . $tontine->nom . '" a été acceptée.',
-            'lu'        => false,
-        ]);
-
-        return back()->with('success', 'Demande approuvée avec succès !');
+    // Vérifier à nouveau la limite avant d'approuver
+    if ($tontine->estPleine()) {
+        return back()->with('error', 'La tontine est pleine. Impossible d\'approuver.');
     }
+
+    $tontine->membres()->updateExistingPivot($membreId, ['statut' => 'approuve']);
+
+    $message = 'Votre demande pour rejoindre la tontine "' . $tontine->nom . '" a été acceptée.';
+
+    if ($tontine->lien_whatsapp) {
+        $message .= ' Rejoignez le groupe WhatsApp : ' . $tontine->lien_whatsapp;
+    }
+
+    NotificationMembre::create([
+        'membre_id' => $membreId,
+        'titre'     => 'Demande acceptée',
+        'message'   => $message,
+        'lu'        => false,
+    ]);
+
+  return back()->with('success', 'Demande approuvée avec succès !')->with('section', 'gestion');
+}
 
     // -----------------------------------------------
     // REFUSER UNE DEMANDE (gérant/admin/super_admin)
@@ -334,7 +347,7 @@ class ControlleurTontine extends Controller
             'lu'        => false,
         ]);
 
-        return back()->with('success', 'Demande refusée.');
+      return back()->with('success', 'Demande refusée.')->with('section', 'gestion');
     }
 
     // -----------------------------------------------

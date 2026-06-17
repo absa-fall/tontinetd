@@ -7,14 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class Tontine extends Model
 {
     protected $fillable = [
-        'nom',
-        'description',
-        'date_debut',
-        'date_fin',
-        'montant',
-        'frequence',
-        'nombre_max_membres',
-    ];
+    'nom',
+    'description',
+    'date_debut',
+    'date_fin',
+    'montant',
+    'frequence',
+    'nombre_max_membres',
+    'lien_whatsapp',
+];
 
     public function membres()
     {

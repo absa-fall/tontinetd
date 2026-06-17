@@ -667,6 +667,19 @@
                             </div>
 
                             <div style="font-size:0.88rem;color:var(--text);margin-top:0.6rem;line-height:1.5;">{{ $notif->message }}</div>
+                          @if(($notif->titre === 'Demande acceptée' || $notif->titre === 'Ajout à une tontine') && str_contains($notif->message, 'https://chat.whatsapp.com'))
+                            @php
+        preg_match('/(https:\/\/chat\.whatsapp\.com\/\S+)/', $notif->message, $matches);
+        $lienWa = $matches[1] ?? null;
+    @endphp
+    @if($lienWa)
+    <div style="margin-top:0.8rem;">
+        <a href="{{ $lienWa }}" target="_blank" class="btn" style="background:#25d366;color:#fff;display:inline-flex;align-items:center;gap:0.4rem;">
+            Rejoindre le groupe WhatsApp
+        </a>
+    </div>
+    @endif
+@endif
 
                            {{-- Boutons mode réception --}}
                             @if($notif->titre === 'Vous êtes bénéficiaire !')

@@ -439,6 +439,10 @@
     <label class="form-label">Nombre max de membres</label>
     <input type="number" name="nombre_max_membres" class="form-control" min="2" max="500" value="10" required>
 </div>
+<div class="form-group">
+    <label class="form-label">Lien groupe WhatsApp (optionnel)</label>
+    <input type="url" name="lien_whatsapp" class="form-control" placeholder="https://chat.whatsapp.com/...">
+</div>
                         <div class="form-group">
                             <label class="form-label">Membres bénéficiaires</label>
                             <select name="membre_ids[]" class="form-control" required>
@@ -494,6 +498,7 @@
             </div>
         </div>
     </div>
+    
 
     <!-- COTISATIONS -->
     <div class="section" id="section-cotisations">

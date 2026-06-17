@@ -227,6 +227,19 @@
                 <div style="flex:1">
                     <div style="font-weight:600;font-size:0.9rem;">{{ $notif->titre }}</div>
                     <div style="font-size:0.82rem;color:var(--muted);">{{ $notif->message }}</div>
+                    @if($notif->titre === 'Demande acceptée' && str_contains($notif->message, 'https://chat.whatsapp.com'))
+    @php
+        preg_match('/(https:\/\/chat\.whatsapp\.com\/\S+)/', $notif->message, $matches);
+        $lienWa = $matches[1] ?? null;
+    @endphp
+    @if($lienWa)
+    <div style="margin-top:0.8rem;">
+        <a href="{{ $lienWa }}" target="_blank" class="btn" style="background:#25d366;color:#fff;display:inline-flex;align-items:center;gap:0.4rem;">
+            Rejoindre le groupe WhatsApp
+        </a>
+    </div>
+    @endif
+@endif
                     <div style="font-size:0.72rem;color:var(--muted);margin-top:0.3rem;">{{ \Carbon\Carbon::parse($notif->created_at)->locale('fr')->diffForHumans() }}</div>
                 </div>
             </div>
@@ -437,6 +450,10 @@
                             <label class="form-label">Nombre max de membres</label>
                             <input type="number" name="nombre_max_membres" id="et_max_create" class="form-control" min="2" max="500" required>
                         </div>
+                        <div class="form-group">
+    <label class="form-label">Lien groupe WhatsApp (optionnel)</label>
+    <input type="url" name="lien_whatsapp" class="form-control" placeholder="https://chat.whatsapp.com/...">
+</div>
                         <div class="form-group">
                             <label class="form-label">Membres bénéficiaires</label>
                             <select name="membre_ids[]" class="form-control">
@@ -712,6 +729,10 @@
                     <label class="form-label">Nombre max de membres</label>
                     <input type="number" name="nombre_max_membres" id="et_max_modal" class="form-control" min="2" max="500" required>
                 </div>
+                <div class="form-group">
+    <label class="form-label">Lien groupe WhatsApp (optionnel)</label>
+    <input type="url" name="lien_whatsapp" class="form-control" placeholder="https://chat.whatsapp.com/...">
+</div>
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('modalTontine')">Annuler</button>
